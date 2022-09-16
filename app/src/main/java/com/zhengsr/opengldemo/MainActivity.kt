@@ -3,14 +3,14 @@ package com.zhengsr.opengldemo
 import android.opengl.GLSurfaceView
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
+import com.zhengsr.opengldemo.render.L1_PointRender
+import com.zhengsr.opengldemo.render.L2_ShapeRender
 import kotlinx.android.synthetic.main.activity_main.*
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
-import java.nio.FloatBuffer
 
 class MainActivity : AppCompatActivity() {
 
-
+    private  val TAG = "MainActivity"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -19,9 +19,15 @@ class MainActivity : AppCompatActivity() {
         with(glSurfaceView){
             setEGLContextClientVersion(2)
             setEGLConfigChooser(false)
-            setRenderer(PointRender())
-            renderMode = GLSurfaceView.RENDERMODE_CONTINUOUSLY
+            setRenderer(L2_ShapeRender())
+            //等待点击才会刷帧
+            renderMode = GLSurfaceView.RENDERMODE_WHEN_DIRTY
+            setOnClickListener {
+                Log.d(TAG, "zsr onCreate: ")
+                requestRender()
+            }
         }
+
 
 
     }

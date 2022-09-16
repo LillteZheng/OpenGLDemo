@@ -1,9 +1,8 @@
-package com.zhengsr.opengldemo
+package com.zhengsr.opengldemo.render
 
-import android.graphics.Shader
 import android.opengl.GLES20
 import android.opengl.GLSurfaceView
-import android.util.Log
+import com.zhengsr.opengldemo.utils.BufferUtil
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
@@ -14,7 +13,7 @@ import javax.microedition.khronos.opengles.GL10
  * @author by zhengshaorui 2022/9/15
  * describe：
  */
-class PointRender : GLSurfaceView.Renderer {
+class L1_PointRender : BaseRender(),GLSurfaceView.Renderer {
     companion object {
         private const val TAG = "PointRender"
 
@@ -61,33 +60,17 @@ class PointRender : GLSurfaceView.Renderer {
         private val POSITION_COMPONENT_COUNT = 2
     }
 
-    private var programId = 0
     private var u_color = 0
-    private var a_position = 0
-    private var vertexData: FloatBuffer = ByteBuffer.allocateDirect(POINT_DATA.size * BYTES_PER_FLOAT)
-        .order(ByteOrder.nativeOrder())
-        .asFloatBuffer()
-
-    init {
-        vertexData.put(POINT_DATA)
-    }
+    private var vertexData: FloatBuffer = BufferUtil.createFloatBuffer(POINT_DATA)
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
         GLES20.glClearColor(1f, 1f, 1f, 1f)
-        //需要编译着色器，编译成一段可执行的bin，去与显卡交流
-        val vertexShader = compileShader(GLES20.GL_VERTEX_SHADER, VERTEX_SHADER)
-        //步骤2，编译片段着色器
-        val fragmentShader = compileShader(GLES20.GL_FRAGMENT_SHADER, FRAGMENT_SHADER)
 
-        // 步骤3：将顶点着色器、片段着色器进行链接，组装成一个OpenGL程序
-        programId = linkProgram(vertexShader, fragmentShader)
-
-        //通过OpenGL 使用该程序
-        GLES20.glUseProgram(programId)
+        makeProgram(VERTEX_SHADER, FRAGMENT_SHADER)
         // 步骤5：获取颜色Uniform在OpenGL程序中的索引
-        u_color = GLES20.glGetUniformLocation(programId, U_COLOR)
+        u_color = getUniform(U_COLOR)
         // 步骤6：获取顶点坐标属性在OpenGL程序中的索引
-        a_position = GLES20.glGetUniformLocation(programId, A_POSITION)
+        val a_position = getAttrib(A_POSITION)
 
         //将缓冲区的指针指到头部，保证数据从头开始
         vertexData.position(0)
@@ -121,58 +104,7 @@ class PointRender : GLSurfaceView.Renderer {
     }
 
 
-    private fun compileShader(type: Int, shaderCode: String): Int {
-        //创建一个shader 对象
-        val shaderId = GLES20.glCreateShader(type)
-        Log.d(TAG, "zsr compileShader id: $shaderId")
-        if (shaderId == 0) {
-            Log.d(TAG, "zsr 创建失败")
-            return 0
-        }
-        //将着色器代码上传到着色器对象中
-        GLES20.glShaderSource(shaderId, shaderCode)
-        //编译对象
-        GLES20.glCompileShader(shaderId)
-        //获取编译状态，OpenGL 把想要获取的值放入长度为1的数据首位
-        val compileStatus = intArrayOf(1)
-        GLES20.glGetShaderiv(shaderId, GLES20.GL_COMPILE_STATUS, compileStatus, 0)
-        Log.d(TAG, "zsr compileShader: ${compileStatus[0]}")
 
-        if (compileStatus[0] == 0) {
-            Log.d(TAG, "zsr 编译失败")
-            GLES20.glDeleteShader(shaderId)
-            return 0
-        }
-
-        return shaderId
-    }
-
-    private fun linkProgram(vertexShaderId: Int, fragmentShaderId: Int): Int {
-        //创建一个 OpenGL 程序对象
-        val programId = GLES20.glCreateProgram()
-        if (programId == 0) {
-            Log.d(TAG, "zsr 创建OpenGL程序对象失败")
-            return 0
-        }
-        //关联顶点着色器
-        GLES20.glAttachShader(programId, vertexShaderId)
-        //关联片段周色漆
-        GLES20.glAttachShader(programId, fragmentShaderId)
-        //将两个着色器关联到 OpenGL 对象
-        GLES20.glLinkProgram(programId)
-        //获取链接状态，OpenGL 把想要获取的值放入长度为1的数据首位
-        val linkStatus = intArrayOf(1)
-        GLES20.glGetProgramiv(programId, GLES20.GL_LINK_STATUS, linkStatus, 0)
-        Log.d(TAG, "zsr linkProgram: ${linkStatus[0]}")
-
-        if (linkStatus[0] == 0) {
-            GLES20.glDeleteProgram(programId)
-            Log.d(TAG, "zsr 编译失败")
-            return 0
-        }
-        return programId;
-
-    }
 
 
 }
