@@ -1,13 +1,14 @@
 package com.zhengsr.opengldemo.render
 
 import android.opengl.GLES20
+import android.opengl.GLSurfaceView
 import android.util.Log
 
 /**
  * @author by zhengshaorui 2022/9/16
  * describe：
  */
-abstract class BaseRender {
+abstract class BaseRender: GLSurfaceView.Renderer {
     companion object{
         private const val TAG = "BaseRender"
     }

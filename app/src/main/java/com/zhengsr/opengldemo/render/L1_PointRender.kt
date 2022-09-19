@@ -13,12 +13,17 @@ import javax.microedition.khronos.opengles.GL10
  * @author by zhengshaorui 2022/9/15
  * describe：
  */
-class L1_PointRender : BaseRender(),GLSurfaceView.Renderer {
+class L1_PointRender : BaseRender(){
     companion object {
         private const val TAG = "PointRender"
 
         /**
          * 顶点着色器：之后定义的每个都会传1次给顶点着色器
+         *         //关键字 概念：
+        // 1. uniform 由外部程序传递给 shader，就像是C语言里面的常量，shader 只能用，不能改；
+        // 2. attribute 是只能在 vertex shader 中使用的变量；
+        // 3. varying 变量是 vertex shader 和 fragment shader 之间做数据传递用的。
+        // 更多说明：http://blog.csdn.net/jackers679/article/details/6848085
          */
         private val VERTEX_SHADER = """
                 // vec4：4个分量的向量：x、y、z、w

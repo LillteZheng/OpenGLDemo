@@ -1,19 +1,17 @@
 package com.zhengsr.opengldemo.render
 
 import android.opengl.GLES20
-import android.opengl.GLSurfaceView
-import android.util.Log
+import android.opengl.Matrix
 import com.zhengsr.opengldemo.utils.BufferUtil
-import java.nio.FloatBuffer
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
 /**
  * @author by zhengshaorui 2022/9/16
- * describe：opengl 只有三种类型，点，线，三角形，任何图形都是基于此去绘制
+ * describe：正交投影
  *
  */
-class L2_ShapeRender : BaseRender(){
+class L3_ShapeRender : BaseRender() {
 
 
     companion object {
@@ -21,16 +19,19 @@ class L2_ShapeRender : BaseRender(){
 
         /**
          * 顶点着色器：之后定义的每个都会传1次给顶点着色器
+         * 修改顶部着色器的坐标值，即增加个举证x向量
          */
         private const val VERTEX_SHADER = """
                 // vec4：4个分量的向量：x、y、z、w
                 attribute vec4 a_Position;
+                uniform mat4 u_Matrix;
                 void main()
                 {
-                // gl_Position：GL中默认定义的输出变量，决定了当前顶点的最终位置
-                    gl_Position = a_Position;
+                 // 矩阵与向量相乘得到最终的位置
+                    gl_Position = u_Matrix * a_Position;
                 // gl_PointSize：GL中默认定义的输出变量，决定了当前顶点的大小
                     gl_PointSize = 30.0;
+                     
                 }
         """
 
@@ -58,23 +59,33 @@ class L2_ShapeRender : BaseRender(){
             0.5f, 0f,
             0.5f, 0.5f,
         )
-        private const val U_COLOR = "u_Color"
+        private const val U_MATRIX = "u_Matrix"
         private const val A_POSITION = "a_Position"
+        private const val U_COLOR = "u_Color"
+        private val UnitMatrix = floatArrayOf(
+            1f, 0f, 0f, 0f,
+            0f, 1f, 0f, 0f,
+            0f, 0f, 1f, 0f,
+            0f, 0f, 0f, 1f
+        )
     }
 
     private var vertexData = BufferUtil.createFloatBuffer(POINT_DATA)
+
 
     /**
      * 每个顶点数据关联的分量个数：当前案例只有x、y，故为2
      */
     private val POSITION_COMPONENT_COUNT = 2
-    private var uniformColor = 0
+    private var uMatrix = 0
+    private var uColor = 0;
     private var drawIndex = 0
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
         GLES20.glClearColor(1f, 1f, 1f, 1f)
         makeProgram(VERTEX_SHADER, FRAGMENT_SHADER)
-        uniformColor = getUniform(U_COLOR)
-        var attribPosition = getAttrib(A_POSITION)
+        uColor = getUniform(U_COLOR)
+        uMatrix = getUniform(U_MATRIX)
+        val attribPosition = getAttrib(A_POSITION)
 
         vertexData.position(0)
 
@@ -89,6 +100,17 @@ class L2_ShapeRender : BaseRender(){
 
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
         GLES20.glViewport(0, 0, width, height)
+        val aspectRatio = if (width > height) {
+            width.toFloat() / height
+        } else {
+            height.toFloat() / width
+        }
+        if (width > height){
+           Matrix.orthoM(UnitMatrix,0,-aspectRatio,aspectRatio,-1f,1f,-1f,1f)
+        }else{
+            Matrix.orthoM(UnitMatrix,0,-1f,1f,-aspectRatio,aspectRatio,-1f,1f)
+        }
+        GLES20.glUniformMatrix4fv(uMatrix,1,false, UnitMatrix,0)
     }
 
     override fun onDrawFrame(gl: GL10?) {
@@ -109,12 +131,12 @@ class L2_ShapeRender : BaseRender(){
         // GL_LINES：每2个点构成一条线段
         // GL_LINE_LOOP：按顺序将所有的点连接起来，包括首位相连
         // GL_LINE_STRIP：按顺序将所有的点连接起来，不包括首位相连
-        GLES20.glUniform4f(uniformColor, 1f, 0f, 0f, 1f)
+        GLES20.glUniform4f(uColor, 1f, 0f, 0f, 1f)
         GLES20.glDrawArrays(GLES20.GL_LINE_STRIP, 0, drawIndex)
     }
 
     private fun drawPoint() {
-        GLES20.glUniform4f(uniformColor, 0f, 0f, 1f, 1f)
+        GLES20.glUniform4f(uColor, 0f, 0f, 1f, 1f)
         GLES20.glDrawArrays(GLES20.GL_POINTS, 0, drawIndex)
     }
 
@@ -122,7 +144,7 @@ class L2_ShapeRender : BaseRender(){
         // GL_TRIANGLES：每3个点构成一个三角形
         // GL_TRIANGLE_STRIP：相邻3个点构成一个三角形,不包括首位两个点
         // GL_TRIANGLE_FAN：第一个点和之后所有相邻的2个点构成一个三角形
-        GLES20.glUniform4f(uniformColor, 1f, 1f, 0f, 1f)
+        GLES20.glUniform4f(uColor, 1f, 1f, 0f, 1f)
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_FAN, 0, drawIndex)
     }
 }
