@@ -26,7 +26,8 @@ class MainActivity : AppCompatActivity() {
         val data = arrayListOf<RenderItem>(
             RenderItem(L1_PointRender::class.java, "L1 - 基础类型，点"),
             RenderItem(L2_ShapeRender::class.java, "L2 - 点,线，三角形"),
-            RenderItem(L3_ShapeRender::class.java, "L3 - 正交投影，修复横竖屏，图形变形的问题")
+            RenderItem(L3_ShapeRender::class.java, "L3 - 正交投影，修复横竖屏，图形变形的问题"),
+            RenderItem(L3_ShapeRender::class.java, "L4 - 渐变色"),
         )
         with(recycleView) {
             layoutManager = LinearLayoutManager(this@MainActivity)
@@ -35,7 +36,7 @@ class MainActivity : AppCompatActivity() {
             testAdapter.setOnItemClickListener { adapter, view, position ->
                 val render = getRenderer(data[position].className)
                 glSurfaceView = GLSurfaceView(this@MainActivity).apply {
-                    setEGLContextClientVersion(2)
+                    setEGLContextClientVersion(3)
                     setEGLConfigChooser(false)
                     setOnClickListener {
                         requestRender()

@@ -34,6 +34,7 @@ object BufferUtil {
 
         // 将Dalvik的内存数据复制到Native内存中
         buffer.put(array)
+        buffer.position(0)
         return buffer
     }
 

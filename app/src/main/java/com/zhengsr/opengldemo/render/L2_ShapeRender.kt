@@ -1,6 +1,7 @@
 package com.zhengsr.opengldemo.render
 
 import android.opengl.GLES20
+import android.opengl.GLES30
 import android.opengl.GLSurfaceView
 import android.util.Log
 import com.zhengsr.opengldemo.utils.BufferUtil
@@ -22,14 +23,11 @@ class L2_ShapeRender : BaseRender(){
         /**
          * 顶点着色器：之后定义的每个都会传1次给顶点着色器
          */
-        private const val VERTEX_SHADER = """
-                // vec4：4个分量的向量：x、y、z、w
-                attribute vec4 a_Position;
+        private const val VERTEX_SHADER = """#version 300 es
+                layout(location = 0) in vec4 a_Position;
                 void main()
                 {
-                // gl_Position：GL中默认定义的输出变量，决定了当前顶点的最终位置
                     gl_Position = a_Position;
-                // gl_PointSize：GL中默认定义的输出变量，决定了当前顶点的大小
                     gl_PointSize = 30.0;
                 }
         """
@@ -37,14 +35,14 @@ class L2_ShapeRender : BaseRender(){
         /**
          * 片段着色器
          */
-        private const val FRAGMENT_SHADER = """
+        private const val FRAGMENT_SHADER = """#version 300 es
                 // 定义所有浮点数据类型的默认精度；有lowp、mediump、highp 三种，但只有部分硬件支持片段着色器使用highp。(顶点着色器默认highp)
                 precision mediump float;
+                out vec4 FragColor;
                 uniform vec4 u_Color;
                 void main()
                 {
-                // gl_FragColor：GL中默认定义的输出变量，决定了当前片段的最终颜色
-                   gl_FragColor = u_Color;
+                  FragColor = u_Color;
                 }
         """
 
@@ -55,8 +53,8 @@ class L2_ShapeRender : BaseRender(){
             -0.5f, 0f,
             0f, -0.5f,
             0.5f, -0.5f,
-            0.5f, 0f,
-            0.5f, 0.5f,
+            0.5f, 0f
+
         )
         private const val U_COLOR = "u_Color"
         private const val A_POSITION = "a_Position"
@@ -71,29 +69,26 @@ class L2_ShapeRender : BaseRender(){
     private var uniformColor = 0
     private var drawIndex = 0
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
-        GLES20.glClearColor(1f, 1f, 1f, 1f)
+        GLES30.glClearColor(1f, 1f, 1f, 1f)
         makeProgram(VERTEX_SHADER, FRAGMENT_SHADER)
         uniformColor = getUniform(U_COLOR)
-        var attribPosition = getAttrib(A_POSITION)
-
-        vertexData.position(0)
-
-        GLES20.glVertexAttribPointer(
-            attribPosition, POSITION_COMPONENT_COUNT, GLES20.GL_FLOAT,
+      //  var attribPosition = getAttrib(A_POSITION)
+        GLES30.glVertexAttribPointer(
+            0, POSITION_COMPONENT_COUNT, GLES30.GL_FLOAT,
             false, 0, vertexData
         )
 
-        GLES20.glEnableVertexAttribArray(attribPosition)
+        GLES30.glEnableVertexAttribArray(0)
 
     }
 
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
-        GLES20.glViewport(0, 0, width, height)
+        GLES30.glViewport(0, 0, width, height)
     }
 
     override fun onDrawFrame(gl: GL10?) {
         //步骤1：使用glClearColor设置的颜色，刷新Surface
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
+        GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT)
         drawIndex++
         // glDrawArrays 可以理解成绘制一个图层，多个图层可以叠加，然后通过onDrawFrame绘制到这一帧上
         drawTriangle()
@@ -109,20 +104,20 @@ class L2_ShapeRender : BaseRender(){
         // GL_LINES：每2个点构成一条线段
         // GL_LINE_LOOP：按顺序将所有的点连接起来，包括首位相连
         // GL_LINE_STRIP：按顺序将所有的点连接起来，不包括首位相连
-        GLES20.glUniform4f(uniformColor, 1f, 0f, 0f, 1f)
-        GLES20.glDrawArrays(GLES20.GL_LINE_STRIP, 0, drawIndex)
+        GLES30.glUniform4f(uniformColor, 1f, 0f, 0f, 1f)
+        GLES30.glDrawArrays(GLES30.GL_LINE_LOOP, 0, drawIndex)
     }
 
     private fun drawPoint() {
-        GLES20.glUniform4f(uniformColor, 0f, 0f, 1f, 1f)
-        GLES20.glDrawArrays(GLES20.GL_POINTS, 0, drawIndex)
+        GLES30.glUniform4f(uniformColor, 0f, 0f, 1f, 1f)
+        GLES30.glDrawArrays(GLES30.GL_POINTS, 0, drawIndex)
     }
 
     private fun drawTriangle() {
         // GL_TRIANGLES：每3个点构成一个三角形
         // GL_TRIANGLE_STRIP：相邻3个点构成一个三角形,不包括首位两个点
         // GL_TRIANGLE_FAN：第一个点和之后所有相邻的2个点构成一个三角形
-        GLES20.glUniform4f(uniformColor, 1f, 1f, 0f, 1f)
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_FAN, 0, drawIndex)
+        GLES30.glUniform4f(uniformColor, 1f, 1f, 0f, 1f)
+        GLES30.glDrawArrays(GLES30.GL_TRIANGLE_FAN, 0, drawIndex)
     }
 }
