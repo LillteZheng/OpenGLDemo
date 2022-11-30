@@ -8,14 +8,13 @@ import javax.microedition.khronos.opengles.GL10
 
 /**
  * @author by zhengshaorui 2022/9/16
- * describe：正交投影
+ * describe：优化缓冲区数据
  *
  */
-class L4_ShapeRender : BaseRender() {
+class L5_ShapeRender : BaseRender() {
 
 
     companion object {
-        private const val TAG = "L4_ShapeRender"
 
         /**
          * 顶点着色器：之后定义的每个都会传1次给顶点着色器
@@ -97,7 +96,6 @@ class L4_ShapeRender : BaseRender() {
         makeProgram(VERTEX_SHADER, FRAGMENT_SHADER)
 
         uMatrix = getUniform(U_MATRIX)
-
         vertexData.position(0)
         GLES30.glVertexAttribPointer(
             0, POSITION_COMPONENT_COUNT, GLES30.GL_FLOAT,
