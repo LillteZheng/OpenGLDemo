@@ -25,15 +25,18 @@ class L4_ShapeRender : BaseRender() {
                 layout(location = 0) in vec4 a_Position;
                 // mat4：4×4的矩阵
                 uniform mat4 u_Matrix;
+                //定义可以给外部赋值的顶点数据
                 layout(location = 1) in vec4 a_Color;
+                //给片段着色器的颜色顶点
                 out vec4 vTextColor;
                 void main()
                 {
-                 // 矩阵与向量相乘得到最终的位置
+                    // 矩阵与向量相乘得到最终的位置
                     gl_Position = u_Matrix * a_Position;
-                    gl_PointSize = 30.0;
+                    gl_PointSize = 500.0;
+                    //传递给片段着色器的颜色
                     vTextColor = a_Color;
-                    
+                
                 }
         """
 
@@ -41,9 +44,9 @@ class L4_ShapeRender : BaseRender() {
          * 片段着色器
          */
         private const val FRAGMENT_SHADER = """#version 300 es
-                // 定义所有浮点数据类型的默认精度；有lowp、mediump、highp 三种，但只有部分硬件支持片段着色器使用highp。(顶点着色器默认highp)
                 precision mediump float;
                 out vec4 FragColor;
+                //接收端顶点着色器的数据，名字要相同
                 in vec4 vTextColor;
                 void main()
                 {
@@ -53,9 +56,9 @@ class L4_ShapeRender : BaseRender() {
 
         private val POINT_DATA = floatArrayOf(
             //三角形
-            0f,0.5f,
-            -0.5f,-0.5f,
-            0.5f,-0.5f
+            0f,0.5f,0f,
+            -0.5f,-0.5f,0f,
+            0.5f,-0.5f,0f
         )
         private val COLOR_DATA = floatArrayOf(
             //颜色值 RGB
@@ -63,11 +66,23 @@ class L4_ShapeRender : BaseRender() {
             1f,0f,1f,
             0f,0.5f,1f
         )
+        private val LINE_POINT_DATA = floatArrayOf(
+            //线段
+            -0.5f,0f,0f,
+            0.5f,0f,0f
+        )
+        private val LINE_COLOR_DATA = floatArrayOf(
+            //颜色值 RGB
+            1f,0f,0f,
+            0f,0f,1f,
+        )
+
+
         private val POINT_COLOR_DATA = floatArrayOf(
             //定点+颜色
-            0f,0.5f,1f,0.5f,0.5f,
-            -0.5f,-0.5f,1f,0f,1f,
-            0.5f,-0.5f,0f,0.5f,1f
+            0f,0.5f,0f,1f,0.5f,0.5f,
+            -0.5f,-0.5f,0f,1f,0f,1f,
+            0.5f,-0.5f,0f,0f,0.5f,1f
         )
       //  private const val U_COLOR = "u_Color"
         private const val U_MATRIX = "u_Matrix"
@@ -99,21 +114,19 @@ class L4_ShapeRender : BaseRender() {
         uMatrix = getUniform(U_MATRIX)
 
         vertexData.position(0)
+        //步进为 24
         GLES30.glVertexAttribPointer(
-            0, POSITION_COMPONENT_COUNT, GLES30.GL_FLOAT,
-            false, 20, vertexData
+            0, 3, GLES30.GL_FLOAT,
+            false, 24, vertexData
         )
         GLES30.glEnableVertexAttribArray(0)
-
-        vertexData.position(2)
+        //颜色地址偏移量从3开始，前面3个为位置
+        vertexData.position(3)
         GLES30.glVertexAttribPointer(
-            1, COLOR_COMPONENT_COUNT, GLES30.GL_FLOAT,
-            false, 20, vertexData
+            1, 3, GLES30.GL_FLOAT,
+            false, 24, vertexData
         )
         GLES30.glEnableVertexAttribArray(1)
-
-
-
     }
 
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
