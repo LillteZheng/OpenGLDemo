@@ -9,10 +9,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.chad.library.adapter.base.BaseQuickAdapter
 import com.chad.library.adapter.base.viewholder.QuickViewHolder
-import com.zhengsr.opengldemo.render.L1_PointRender
-import com.zhengsr.opengldemo.render.L2_ShapeRender
-import com.zhengsr.opengldemo.render.L3_ShapeRender
-import com.zhengsr.opengldemo.render.L4_ShapeRender
+import com.zhengsr.opengldemo.render.*
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -29,6 +26,7 @@ class MainActivity : AppCompatActivity() {
             RenderItem(L2_ShapeRender::class.java, "L2 - 点,线，三角形"),
             RenderItem(L3_ShapeRender::class.java, "L3 - 正交投影，修复横竖屏，图形变形的问题"),
             RenderItem(L4_ShapeRender::class.java, "L4 - 渐变色"),
+            RenderItem(L5_ShapeRender::class.java, "L5 - 优化数据VBO,VAO"),
         )
         with(recycleView) {
             layoutManager = LinearLayoutManager(this@MainActivity)
