@@ -27,6 +27,7 @@ class MainActivity : AppCompatActivity() {
             RenderItem(L3_ShapeRender::class.java, "L3 - 正交投影，修复横竖屏，图形变形的问题"),
             RenderItem(L4_ShapeRender::class.java, "L4 - 渐变色"),
             RenderItem(L5_ShapeRender::class.java, "L5 - 优化数据VBO,VAO"),
+            RenderItem(L6_ShapeRender::class.java, "L6 - 纹理"),
         )
         with(recycleView) {
             layoutManager = LinearLayoutManager(this@MainActivity)

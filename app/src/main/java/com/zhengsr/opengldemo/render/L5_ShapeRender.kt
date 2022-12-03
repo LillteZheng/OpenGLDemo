@@ -8,7 +8,7 @@ import javax.microedition.khronos.opengles.GL10
 
 /**
  * @author by zhengshaorui 2022/9/16
- * describe：正交投影
+ * describe：VBO,VAO,EBO
  *
  */
 class L5_ShapeRender : BaseRender() {
