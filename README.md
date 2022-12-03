@@ -43,7 +43,7 @@
  
 [Android OpenGL ES 学习(五) -- 渐变色](https://blog.csdn.net/u011418943/article/details/128120008?spm=1001.2014.3001.5502)
 
-[Android OpenGL ES 学习(六) – 使用 VBO、VAO 和 EBO/IBO 优化程序](https://mp.csdn.net/mp_blog/creation/success/128150904)
+[Android OpenGL ES 学习(六) – 使用 VBO、VAO 和 EBO/IBO 优化程序](https://blog.csdn.net/u011418943/article/details/128150904?spm=1001.2014.3001.5502)
 
 [Android OpenGL ES 学习(七) – 纹理 ](https://blog.csdn.net/u011418943/article/details/128163235?spm=1001.2014.3001.5502)
 
