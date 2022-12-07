@@ -142,19 +142,7 @@ class L6_ShapeRender : BaseRender() {
     override fun onDrawFrame(gl: GL10?) {
         //步骤1：使用glClearColor设置的颜色，刷新Surface
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT)
-        //useVbo()
-        //   GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER,vbo[0])
-        //   GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP,0,3)
 
-        //useEboAndVbo
-        // GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER,vbo[0])
-        // GLES30.glBindBuffer(GLES30.GL_ELEMENT_ARRAY_BUFFER,ebo[0])
-        // GLES30.glDrawElements(GLES30.GL_TRIANGLE_STRIP,6,GLES30.GL_UNSIGNED_INT,0)
-
-
-        // useVaoVbo
-//        GLES30.glBindVertexArray(vao[0])
-//        GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP,0,3)
 
         //useVaoVboAndEbo
         texture?.apply {

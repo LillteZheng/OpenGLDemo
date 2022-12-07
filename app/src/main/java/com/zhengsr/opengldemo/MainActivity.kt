@@ -28,6 +28,7 @@ class MainActivity : AppCompatActivity() {
             RenderItem(L4_ShapeRender::class.java, "L4 - 渐变色"),
             RenderItem(L5_ShapeRender::class.java, "L5 - 优化数据VBO,VAO"),
             RenderItem(L6_ShapeRender::class.java, "L6 - 纹理"),
+            RenderItem(L6_ShapeRender_1::class.java, "L6-1 - 多纹理-图片混合"),
         )
         with(recycleView) {
             layoutManager = LinearLayoutManager(this@MainActivity)
