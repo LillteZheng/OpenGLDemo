@@ -1,8 +1,12 @@
 package com.zhengsr.opengldemo.render
 
+import android.content.Context
 import android.opengl.GLES30
 import android.opengl.GLSurfaceView
 import android.util.Log
+import android.view.View
+import android.view.ViewGroup
+import kotlinx.android.synthetic.main.activity_main.*
 
 /**
  * @author by zhengshaorui 2022/9/16
@@ -14,6 +18,35 @@ abstract class BaseRender : GLSurfaceView.Renderer {
     }
 
     protected var programId = 0
+    var view: View? = null
+    open fun show(context: Context) {
+        view = GLSurfaceView(context).apply {
+            setEGLContextClientVersion(3)
+            setEGLConfigChooser(false)
+            setOnClickListener {
+                requestRender()
+            }
+            visibility = View.VISIBLE
+            setRenderer(this@BaseRender)
+            //等待点击才会刷帧
+            renderMode = GLSurfaceView.RENDERMODE_WHEN_DIRTY
+        }
+    }
+
+    open fun dismiss() {
+        view?.let {
+            it.parent?.let { parent->
+                if (parent is ViewGroup) {
+                    parent.removeView(it)
+                }
+            }
+        }
+        view?.visibility = View.GONE
+        view = null
+    }
+
+
+
 
     /**
      * 生成可执行程序，并使用该程序

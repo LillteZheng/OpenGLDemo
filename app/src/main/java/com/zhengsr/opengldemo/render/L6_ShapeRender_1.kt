@@ -1,14 +1,21 @@
 package com.zhengsr.opengldemo.render
 
+import android.content.Context
 import android.opengl.GLES30
+import android.opengl.GLSurfaceView
 import android.opengl.Matrix
 import android.util.Log
+import android.view.View
+import android.view.ViewGroup
+import android.widget.Button
+import android.widget.FrameLayout
+import android.widget.LinearLayout
+import android.widget.Toast
 import com.zhengsr.opengldemo.MainApplication
 import com.zhengsr.opengldemo.R
 import com.zhengsr.opengldemo.utils.BufferUtil
 import com.zhengsr.opengldemo.utils.TextureBean
 import com.zhengsr.opengldemo.utils.loadTexture
-import java.nio.FloatBuffer
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
@@ -28,46 +35,51 @@ class L6_ShapeRender_1 : BaseRender() {
         private const val VERTEX_SHADER = """#version 300 es
                 uniform mat4 u_Matrix;
                 layout(location = 0) in vec4 a_Position;
-                layout(location = 1) in vec2 aTexture;
+                layout(location = 1) in vec4 a_Color;
+                layout(location = 2) in vec2 aTexture;
+                out vec4 vTextColor;
                 out vec2 vTexture;
                 void main()
                 {
                     // 矩阵与向量相乘得到最终的位置
                     gl_Position = u_Matrix * a_Position;
                     //传递给片段着色器的颜色
+                    vTextColor = a_Color;
                     vTexture = aTexture;
                 
                 }
         """
-        private val TAG = L6_ShapeRender_1::class.java.simpleName
+        private val TAG = L6_ShapeRender::class.java.simpleName
+
 
         /**
          * 片段着色器
          */
-        private const val FRAGMENT_SHADER = """#version 300 es
-            precision mediump float;
-            out vec4 FragColor;
-            in vec2 vTexture;
-            uniform sampler2D ourTexture;
-            uniform sampler2D ourTexture2;
-            void main()
-            {
-                vec4 texture1 = texture(ourTexture,vTexture) ;
-                vec4 texture2 = texture(ourTexture2,vTexture) ;
-                FragColor = mix(texture1,texture2,0.5);
-            }
+        private var FRAGMENT_SHADER = """#version 300 es
+                precision mediump float;
+                out vec4 FragColor;
+                in vec4 vTextColor;
+                in vec2 vTexture;
+                uniform sampler2D ourTexture;
+                uniform sampler2D ourTexture2;
+                void main()
+                {
+                  vec4 texture1 = texture(ourTexture,vTexture);
+                  vec4 texture2 = texture(ourTexture2,vTexture);
+                  FragColor = texture1 ;
+                  //FragColor = texture1 * texture2;
+                 // FragColor = mix(texture1,texture2,0.5);
+                }
         """
 
 
-
         private val POINT_RECT_DATA2 = floatArrayOf(
-            // positions           // texture coords
-            0.8f, 0.8f, 0.0f, 1.0f, 0.0f, // top right
-            0.8f, -0.8f, 0.0f, 1.0f, 1.0f, // bottom right
-            -0.8f, -0.8f, 0.0f, 0.0f, 1.0f, // bottom left
-            -0.8f, 0.8f, 0.0f, 0.0f, 0.0f  // top left
+            // positions         //color              // texture coords
+            0.8f, 0.8f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // top right
+            0.8f, -0.8f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, // bottom right
+            -0.8f, -0.8f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, // bottom left
+            -0.8f, 0.8f, 0.0f, 0.0f, 0.5f, 1.0f, 0.0f, 0.0f  // top left
         )
-
 
         private val indeices = intArrayOf(
             // 注意索引从0开始!
@@ -105,14 +117,11 @@ class L6_ShapeRender_1 : BaseRender() {
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
         GLES30.glClearColor(1f, 1f, 1f, 1f)
         val programId = makeProgram(VERTEX_SHADER, FRAGMENT_SHADER)
-
         uMatrix = getUniform(U_MATRIX)
-        GLES30.glUniform1i(GLES30.glGetUniformLocation(programId,"ourTexture"),0)
-        GLES30.glUniform1i(GLES30.glGetUniformLocation(programId,"ourTexture2"),1)
-
-        // useVbo()
-        //useEboAndVbo()
-        //  useVaoVbo()
+        GLES30.glUniform1i(GLES30.glGetUniformLocation(programId, "ourTexture"), 0)
+        GLES30.glUniform1i(GLES30.glGetUniformLocation(programId, "ourTexture2"), 1)
+        useVaoVboAndEbo()
+        Log.d(TAG, "zsr onSurfaceCreated: ")
     }
 
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
@@ -143,43 +152,30 @@ class L6_ShapeRender_1 : BaseRender() {
     override fun onDrawFrame(gl: GL10?) {
         //步骤1：使用glClearColor设置的颜色，刷新Surface
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT)
-        val vertexData = BufferUtil.createFloatBuffer(POINT_RECT_DATA2)
-        val texture = useVaoTexture(vertexData,R.mipmap.wuliuqi)
-        texture.bean1?.let {
+
+
+        //useVaoVboAndEbo
+        texture?.apply {
             GLES30.glActiveTexture(GLES30.GL_TEXTURE0)
-            GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, it.id)
+            GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, id)
         }
-        texture.bean2?.let {
+        texture2?.apply {
             GLES30.glActiveTexture(GLES30.GL_TEXTURE1)
-            GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, it.id)
+            GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, id)
         }
-        GLES30.glBindVertexArray(texture.vao)
+
+        GLES30.glBindVertexArray(vao[0])
         GLES30.glDrawElements(GLES30.GL_TRIANGLE_STRIP, 6, GLES30.GL_UNSIGNED_INT, 0)
-
-    }
-
-    private fun drawTexture1() {
-
-    }
-
-    private fun drawTexture2() {
-        /*val vertexData = BufferUtil.createFloatBuffer(POINT_RECT_DATA2)
-        val texture = useVaoTexture(vertexData,R.mipmap.wuliuqi2)
-        texture.bean?.let {
-            GLES30.glActiveTexture(GLES30.GL_TEXTURE1)
-            GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, it.id)
-        }
-        GLES30.glBindVertexArray(texture.vao)
-        GLES30.glDrawElements(GLES30.GL_TRIANGLE_STRIP, 6, GLES30.GL_UNSIGNED_INT, 0)*/
     }
 
 
-    private fun useVaoTexture(vertexData: FloatBuffer, resId: Int): VaoTexture {
-        val texture = VaoTexture()
-        val vbo = IntArray(1)
-        val ebo = IntArray(1)
-        val vao = IntArray(1)
-
+    val vbo = IntArray(2)
+    val ebo = IntArray(1)
+    private val vao = IntArray(2)
+    private var texture: TextureBean? = null
+    private var texture2: TextureBean? = null
+    private fun useVaoVboAndEbo() {
+        val vertexData = BufferUtil.createFloatBuffer(POINT_RECT_DATA2)
         val indexData = BufferUtil.createIntBuffer(indeices)
 
 
@@ -202,6 +198,7 @@ class L6_ShapeRender_1 : BaseRender() {
         GLES30.glGenBuffers(1, ebo, 0)
         //绑定 ebo 到上下文
         GLES30.glBindBuffer(GLES30.GL_ELEMENT_ARRAY_BUFFER, ebo[0])
+        //昂丁
         GLES30.glBufferData(
             GLES30.GL_ELEMENT_ARRAY_BUFFER,
             indexData.capacity() * 4,
@@ -212,20 +209,27 @@ class L6_ShapeRender_1 : BaseRender() {
         //绘制位置
         GLES30.glVertexAttribPointer(
             0, 3, GLES30.GL_FLOAT,
-            false, 5 * 4, 0
+            false, 8 * 4, 0
         )
         GLES30.glEnableVertexAttribArray(0)
 
-
-        texture.bean1 = loadTexture(TAG, MainApplication.context, R.mipmap.wuliuqi)
-        texture.bean2 = loadTexture(TAG, MainApplication.context, R.mipmap.wuliuqi2)
-        //纹理在位置和颜色之后，偏移量为6
+        //绘制颜色，颜色地址偏移量从3开始，前面3个为位置
         vertexData.position(3)
         GLES30.glVertexAttribPointer(
-            1, 2, GLES30.GL_FLOAT,
-            false, 5 * 4, 3 * 4 //需要指定颜色的地址 3 * 4
+            1, 3, GLES30.GL_FLOAT,
+            false, 8 * 4, 3 * 4 //需要指定颜色的地址 3 * 4
         )
         GLES30.glEnableVertexAttribArray(1)
+
+        texture = loadTexture(TAG, MainApplication.context, R.mipmap.wuliuqi)
+        texture2 = loadTexture(TAG, MainApplication.context, R.mipmap.wuliuqi2)
+        //纹理在位置和颜色之后，偏移量为6
+        vertexData.position(6)
+        GLES30.glVertexAttribPointer(
+            2, 2, GLES30.GL_FLOAT,
+            false, 8 * 4, 6 * 4 //需要指定颜色的地址 3 * 4
+        )
+        GLES30.glEnableVertexAttribArray(2)
 
 
         Log.d(TAG, " useVaoVboAndEbo,get texture $texture")
@@ -233,11 +237,126 @@ class L6_ShapeRender_1 : BaseRender() {
         GLES30.glBindVertexArray(0)
         //注意顺序，ebo 要在 eao 之后
         GLES30.glBindBuffer(GLES30.GL_ELEMENT_ARRAY_BUFFER, 0)
-        texture.vao = vao[0]
-        return texture
     }
-}
 
-data class VaoTexture(var vao: Int, var bean1: TextureBean?,var bean2: TextureBean?) {
-    constructor() : this(0, null,null)
+    override fun show(context: Context) {
+        //super.show(context)
+        val frame = FrameLayout(context)
+        val glView = GLSurfaceView(context).apply {
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+            setEGLContextClientVersion(3)
+            setEGLConfigChooser(false)
+            setOnClickListener {
+                requestRender()
+            }
+            setRenderer(this@L6_ShapeRender_1)
+            //等待点击才会刷帧
+            renderMode = GLSurfaceView.RENDERMODE_WHEN_DIRTY
+            frame.addView(this)
+        }
+        val linear = LinearLayout(context).apply {
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+            orientation = LinearLayout.HORIZONTAL
+            frame.addView(this)
+        }
+        Button(context).apply {
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+            text = "图片1"
+            setOnClickListener {
+                changeFragmentShader("FragColor = texture1;")
+                frame.removeAllViews()
+                frame.addView(glView)
+                frame.addView(linear)
+            }
+            linear.addView(this)
+        }
+        Button(context).apply {
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+            text = "图片2"
+            setOnClickListener {
+                changeFragmentShader("FragColor = texture2;")
+                frame.removeAllViews()
+                frame.addView(glView)
+                frame.addView(linear)
+            }
+            linear.addView(this)
+        }
+        Button(context).apply {
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+            text = "混合"
+            setOnClickListener {
+                changeFragmentShader("FragColor = mix(texture1,texture2,0.5);")
+                frame.removeAllViews()
+                frame.addView(glView)
+                frame.addView(linear)
+            }
+            linear.addView(this)
+        }
+        Button(context).apply {
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+            text = "相加"
+            setOnClickListener {
+                changeFragmentShader("FragColor = texture1+texture2;")
+                frame.removeAllViews()
+                frame.addView(glView)
+                frame.addView(linear)
+            }
+            linear.addView(this)
+        }
+        Button(context).apply {
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+            text = "相乘"
+            setOnClickListener {
+                changeFragmentShader("FragColor = texture1*texture2;")
+                frame.removeAllViews()
+                frame.addView(glView)
+                frame.addView(linear)
+            }
+            linear.addView(this)
+        }
+
+        view = frame
+    }
+
+    private fun changeFragmentShader(colorMsg: String) {
+        FRAGMENT_SHADER = """#version 300 es
+                precision mediump float;
+                out vec4 FragColor;
+                in vec4 vTextColor;
+                in vec2 vTexture;
+                uniform sampler2D ourTexture;
+                uniform sampler2D ourTexture2;
+                void main()
+                {
+                  vec4 texture1 = texture(ourTexture,vTexture);
+                  vec4 texture2 = texture(ourTexture2,vTexture); """ + "$colorMsg}"
+        //FragColor = texture1 + texture2;
+        //FragColor = texture1 * texture2;
+        //FragColor = mix(texture1,texture2,0.5);
+
+
+    }
+
+
 }

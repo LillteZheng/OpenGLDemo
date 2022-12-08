@@ -15,7 +15,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 class MainActivity : AppCompatActivity() {
 
     private val TAG = "MainActivity"
-    private var glSurfaceView: GLSurfaceView? = null;
+    private var curRender: BaseRender? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -35,20 +35,12 @@ class MainActivity : AppCompatActivity() {
             val testAdapter = TestAdapter()
             testAdapter.submitList(data)
             testAdapter.setOnItemClickListener { adapter, view, position ->
-                val render = getRenderer(data[position].className)
-                glSurfaceView = GLSurfaceView(this@MainActivity).apply {
-                    setEGLContextClientVersion(3)
-                    setEGLConfigChooser(false)
-                    setOnClickListener {
-                        requestRender()
-                    }
-                    visibility = View.VISIBLE
+                curRender = getRenderer(data[position].className)?.apply {
+                    show(this@MainActivity)
                     recycleView.visibility = View.GONE
-                    setRenderer(render)
-                    //等待点击才会刷帧
-                    renderMode = GLSurfaceView.RENDERMODE_WHEN_DIRTY
-                    rootContent.addView(this)
+                    rootContent.addView(this.view)
                 }
+
 
             }
             adapter = testAdapter
@@ -61,9 +53,7 @@ class MainActivity : AppCompatActivity() {
 
         if (recycleView.visibility == View.GONE) {
             recycleView.visibility = View.VISIBLE
-            glSurfaceView?.visibility = View.GONE
-            rootContent.removeView(glSurfaceView)
-            glSurfaceView = null
+            curRender?.dismiss()
             return
         }
         super.onBackPressed()
@@ -89,15 +79,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    override fun onResume() {
-        super.onResume()
-        glSurfaceView?.onResume()
-    }
 
-    override fun onPause() {
-        super.onPause()
-        glSurfaceView?.onPause()
-    }
 
     override fun onDestroy() {
         super.onDestroy()
@@ -105,10 +87,10 @@ class MainActivity : AppCompatActivity() {
 
     data class RenderItem(val className: Class<*>, val content: String)
 
-    fun getRenderer(className: Class<*>): GLSurfaceView.Renderer? {
+    fun getRenderer(className: Class<*>): BaseRender? {
         try {
             val constructor = className.getConstructor()
-            return constructor.newInstance() as GLSurfaceView.Renderer
+            return constructor.newInstance() as BaseRender
         } catch (e: Exception) {
             e.printStackTrace()
         }
