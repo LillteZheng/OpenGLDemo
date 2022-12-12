@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.LinearLayout
+import android.widget.Toast
 import com.zhengsr.opengldemo.AutoNextLineLinearLayout
 import com.zhengsr.opengldemo.MainApplication
 import com.zhengsr.opengldemo.R
@@ -308,6 +309,18 @@ class L7_ShapeRender : BaseRender() {
                     Matrix.orthoM(UnitMatrix, 0, -1f, 1f, -aspectRatio, aspectRatio, -1f, 1f)
                 }
                 glView.requestRender()
+            }
+            linear.addView(this)
+        }
+        Button(context).apply {
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+            text = "透视投影"
+            setOnClickListener {
+               //todo 还未实现，还未理解好
+                Toast.makeText(it.context, "还未实现", Toast.LENGTH_SHORT).show()
             }
             linear.addView(this)
         }
