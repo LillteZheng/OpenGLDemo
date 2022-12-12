@@ -129,11 +129,10 @@ class L6_ShapeRender : BaseRender() {
         // 6. top：y的最大值
         // 7. near：z的最小值
         // 8. far：z的最大值
-        // 由于是正交矩阵，所以偏移量为0，near 和 far 也不起作用，让他们不相等即可
         if (width > height) {
-            Matrix.orthoM(UnitMatrix, 0, -aspectRatio, aspectRatio, -1f, 1f, 0f, 1f)
+            Matrix.orthoM(UnitMatrix, 0, -aspectRatio, aspectRatio, -1f, 1f, -1f, 1f)
         } else {
-            Matrix.orthoM(UnitMatrix, 0, -1f, 1f, -aspectRatio, aspectRatio, 0f, 1f)
+            Matrix.orthoM(UnitMatrix, 0, -1f, 1f, -aspectRatio, aspectRatio, -1f, 1f)
         }
         //更新 matrix 的值，即把 UnitMatrix 值，更新到 uMatrix 这个索引
         GLES30.glUniformMatrix4fv(uMatrix, 1, false, UnitMatrix, 0)
