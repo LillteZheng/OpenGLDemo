@@ -265,20 +265,13 @@ class L6_ShapeRender_1 : BaseRender() {
             orientation = LinearLayout.HORIZONTAL
             frame.addView(this)
         }
-        Button(context).apply {
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            )
-            text = "图片1"
-            setOnClickListener {
-                changeFragmentShader("FragColor = texture1;")
-                frame.removeAllViews()
-                frame.addView(glView)
-                frame.addView(linear)
-            }
-            linear.addView(this)
+        linear.addBtn("图片1"){
+            changeFragmentShader("FragColor = texture1;")
+            frame.removeAllViews()
+            frame.addView(glView)
+            frame.addView(linear)
         }
+
         Button(context).apply {
             layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,

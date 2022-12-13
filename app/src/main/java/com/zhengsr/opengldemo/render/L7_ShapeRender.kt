@@ -232,97 +232,45 @@ class L7_ShapeRender : BaseRender() {
             orientation = LinearLayout.HORIZONTAL
             frame.addView(this)
         }
-        Button(context).apply {
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            )
-            text = "还原"
-            setOnClickListener {
-                Matrix.orthoM(UnitMatrix, 0, -1f, 1f, -1f, 1f, -1f, 1f)
-                glView.requestRender()
-            }
-            linear.addView(this)
+        linear.addBtn("还原"){
+            Matrix.orthoM(UnitMatrix, 0, -1f, 1f, -1f, 1f, -1f, 1f)
+            glView.requestRender()
         }
-        Button(context).apply {
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            )
-            text = "平移"
-            setOnClickListener {
-                Matrix.translateM(UnitMatrix,0,0.5f,0.5f,0f)
-                glView.requestRender()
-            }
-            linear.addView(this)
+        linear.addBtn("平移"){
+            Matrix.translateM(UnitMatrix,0,0.5f,0.0f,0f)
+            glView.requestRender()
         }
-        Button(context).apply {
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            )
-            text = "旋转"
-            setOnClickListener {
-                Matrix.rotateM(UnitMatrix, 0, 180f, 1f, 0f, 0f);
-                glView.requestRender()
-            }
-            linear.addView(this)
+        linear.addBtn("旋转"){
+            Matrix.rotateM(UnitMatrix, 0, 180f, 1f, 0f, 0f);
+            glView.requestRender()
         }
-        Button(context).apply {
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            )
-            text = "缩放"
-            setOnClickListener {
-                Matrix.scaleM(UnitMatrix,0,0.8f,0.8f,0f)
-                glView.requestRender()
-            }
-            linear.addView(this)
+        linear.addBtn("缩放"){
+            Matrix.scaleM(UnitMatrix,0,0.8f,0.8f,0f)
+            glView.requestRender()
         }
-        Button(context).apply {
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            )
-            text = "正交投影"
-            setOnClickListener {
-                val width = glView.width
-                val height = glView.height
-                val aspectRatio = if (width > height) {
-                    width.toFloat() / height
-                } else {
-                    height.toFloat() / width
-                }
-                // 1. 矩阵数组
-                // 2. 结果矩阵起始的偏移量
-                // 3. left：x的最小值
-                // 4. right：x的最大值
-                // 5. bottom：y的最小值
-                // 6. top：y的最大值
-                // 7. near：z的最小值
-                // 8. far：z的最大值
-                // 由于是正交矩阵，所以偏移量为0，near 和 far 也不起作用，让他们不相等即可
-                if (width > height) {
-                    Matrix.orthoM(UnitMatrix, 0, -aspectRatio, aspectRatio, -1f, 1f, -1f, 1f)
-                } else {
-                    Matrix.orthoM(UnitMatrix, 0, -1f, 1f, -aspectRatio, aspectRatio, -1f, 1f)
-                }
-                glView.requestRender()
+        linear.addBtn("正交投影"){
+            val width = glView.width
+            val height = glView.height
+            val aspectRatio = if (width > height) {
+                width.toFloat() / height
+            } else {
+                height.toFloat() / width
             }
-            linear.addView(this)
-        }
-        Button(context).apply {
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            )
-            text = "透视投影"
-            setOnClickListener {
-               //todo 还未实现，还未理解好
-                Toast.makeText(it.context, "还未实现", Toast.LENGTH_SHORT).show()
+            // 1. 矩阵数组
+            // 2. 结果矩阵起始的偏移量
+            // 3. left：x的最小值
+            // 4. right：x的最大值
+            // 5. bottom：y的最小值
+            // 6. top：y的最大值
+            // 7. near：z的最小值
+            // 8. far：z的最大值
+            // 由于是正交矩阵，所以偏移量为0，near 和 far 也不起作用，让他们不相等即可
+            if (width > height) {
+                Matrix.orthoM(UnitMatrix, 0, -aspectRatio, aspectRatio, -1f, 1f, -1f, 1f)
+            } else {
+                Matrix.orthoM(UnitMatrix, 0, -1f, 1f, -aspectRatio, aspectRatio, -1f, 1f)
             }
-            linear.addView(this)
+            glView.requestRender()
         }
 
 

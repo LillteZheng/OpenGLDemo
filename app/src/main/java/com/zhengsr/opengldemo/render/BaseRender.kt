@@ -3,9 +3,12 @@ package com.zhengsr.opengldemo.render
 import android.content.Context
 import android.opengl.GLES30
 import android.opengl.GLSurfaceView
+import android.opengl.Matrix
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 
 /**
@@ -131,6 +134,18 @@ abstract class BaseRender : GLSurfaceView.Renderer {
             return 0
         }
         return programId;
-
+    }
+    fun ViewGroup.addBtn(msg:String,block:()->Unit){
+        Button(context).apply {
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+            text = msg
+            setOnClickListener {
+               block.invoke()
+            }
+            addView(this)
+        }
     }
 }
