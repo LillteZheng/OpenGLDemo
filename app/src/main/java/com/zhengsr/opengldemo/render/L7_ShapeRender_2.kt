@@ -5,6 +5,7 @@ import android.opengl.GLES30
 import android.opengl.GLSurfaceView
 import android.opengl.Matrix
 import android.util.Log
+import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.LinearLayout
@@ -20,10 +21,10 @@ import kotlin.math.max
 
 /**
  * @author by zhengshaorui 2022/9/16
- * describe：纹理
+ * describe：3D 效果
  *
  */
-class L7_ShapeRender_1 : BaseRender() {
+class L7_ShapeRender_2 : BaseRender() {
 
 
     companion object {
@@ -32,9 +33,12 @@ class L7_ShapeRender_1 : BaseRender() {
          * 修改顶部着色器的坐标值，即增加个举证x向量
          */
         private const val VERTEX_SHADER = """#version 300 es
-                uniform mat4 u_Matrix;
                 layout(location = 0) in vec4 a_Position;
                 layout(location = 1) in vec2 aTexture;
+                uniform mat4 model;
+                uniform mat4 view;
+                uniform mat4 projection;
+                 uniform mat4 u_Matrix;
                 out vec4 vTextColor;
                 out vec2 vTexture;
                 void main()
@@ -45,7 +49,7 @@ class L7_ShapeRender_1 : BaseRender() {
                 
                 }
         """
-        private val TAG = L7_ShapeRender_1::class.java.simpleName
+        private val TAG = L7_ShapeRender_2::class.java.simpleName
 
 
         /**
@@ -63,12 +67,51 @@ class L7_ShapeRender_1 : BaseRender() {
         """
 
 
+        /**
+         * 6个面 x 每个面有2个三角形组成 x 每个三角形有3个顶点,共36个顶点
+         */
         private val POINT_RECT_DATA2 = floatArrayOf(
-            // positions           // texture coords
-            0.5f,  0.5f, 0.0f,     1.0f, 0.0f, // top right
-            0.5f, -0.5f, 0.0f,     1.0f, 1.0f, // bottom right
-           -0.5f, -0.5f, 0.0f,     0.0f, 1.0f, // bottom left
-           -0.5f,  0.5f, 0.0f,     0.0f, 0.0f  // top left
+            -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+            0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
+            0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
+            0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
+            -0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+
+            -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+            0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
+            0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
+            0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
+            -0.5f, 0.5f, 0.5f, 0.0f, 1.0f,
+            -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+
+            -0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+            -0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+            -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+            -0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+
+            0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+            0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
+            0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+            0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+            0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+            0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+
+            -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+            0.5f, -0.5f, -0.5f, 1.0f, 1.0f,
+            0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
+            0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
+            -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+            -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+
+            -0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
+            0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
+            0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+            0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+            -0.5f, 0.5f, 0.5f, 0.0f, 0.0f,
+            -0.5f, 0.5f, -0.5f, 0.0f, 1.0f
         )
 
         private val indeices = intArrayOf(
@@ -80,34 +123,8 @@ class L7_ShapeRender_1 : BaseRender() {
             1, 2, 3  // 第二个三角形
         )
 
-        //  private const val U_COLOR = "u_Color"
 
-
-        /*private val modelMatrix = floatArrayOf(
-            1f, 0f, 0f, 0f,
-            0f, 1f, 0f, 0f,
-            0f, 0f, 1f, 0f,
-            0f, 0f, 0f, 1f
-        )
-        private val viewMatrix = floatArrayOf(
-            1f, 0f, 0f, 0f,
-            0f, 1f, 0f, 0f,
-            0f, 0f, 1f, 0f,
-            0f, 0f, 0f, 1f
-        )
-        private val projectMatrix = floatArrayOf(
-            1f, 0f, 0f, 0f,
-            0f, 1f, 0f, 0f,
-            0f, 0f, 1f, 0f,
-            0f, 0f, 0f, 1f
-        )
-        private val mvpMatrix = floatArrayOf(
-            1f, 0f, 0f, 0f,
-            0f, 1f, 0f, 0f,
-            0f, 0f, 1f, 0f,
-            0f, 0f, 0f, 1f
-        )*/
-        private fun getIdentity() =  floatArrayOf(
+        private fun getIdentity() = floatArrayOf(
             1f, 0f, 0f, 0f,
             0f, 1f, 0f, 0f,
             0f, 0f, 1f, 0f,
@@ -133,60 +150,63 @@ class L7_ShapeRender_1 : BaseRender() {
         useVaoVboAndEbo()
     }
 
+    private var angle = -55f
+    private var aspectRatio = 1.1f
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
         GLES30.glViewport(0, 0, width, height)
-        val aspectRatio = if (width > height) {
-            width.toFloat() / height
-        } else {
+        aspectRatio = if (width > height) {
             height.toFloat() / width
-        }
-        //获取矩阵
-        val orthogonalMatrix = getIdentity()
-        val modelMatrix = getIdentity()
-        val viewMatrix = getIdentity()
-        val projectionMatrix = getIdentity()
-        val mvpMatrix = getIdentity()
-
-
-        if (width > height) {
-            Matrix.orthoM(orthogonalMatrix, 0, -aspectRatio, aspectRatio, -1f, 1f, -1f, 1f)
         } else {
-            Matrix.orthoM(orthogonalMatrix, 0, -1f, 1f, -aspectRatio, aspectRatio, -1f, 1f)
+            width.toFloat() / height
         }
-        //设置 M
-        Matrix.rotateM(modelMatrix,0,-55f,1f,0f,0f)
-        Matrix.multiplyMM(modelMatrix,0, modelMatrix,0,orthogonalMatrix,0)
-
-        //设置 V
-        Matrix.translateM(viewMatrix,0,0f,0f,-1.5f)
-
-        //设置 P
-        Matrix.perspectiveM(projectionMatrix,0,45f,aspectRatio,0.3f,100f)
-
-        //组合成 mvp,先 v x m
-        Matrix.multiplyMM(mvpMatrix,0, viewMatrix,0, modelMatrix,0)
-        //然后是 p x v x m
-        Matrix.multiplyMM(mvpMatrix,0, projectionMatrix,0, mvpMatrix,0)
-
-        val u_Matrix = getUniform("u_Matrix")
-        GLES30.glUniformMatrix4fv(u_Matrix,1,false, mvpMatrix,0)
 
 
+        //开启z轴缓冲,深度测试
+        GLES30.glEnable(GLES30.GL_DEPTH_TEST)
     }
 
+    //获取矩阵
+    val modelMatrix = getIdentity()
+    val viewMatrix = getIdentity()
+    val projectionMatrix = getIdentity()
+    val mvpMatrix = getIdentity()
     override fun onDrawFrame(gl: GL10?) {
         //步骤1：使用glClearColor设置的颜色，刷新Surface
-        GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT)
+        GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT or GLES30.GL_DEPTH_BUFFER_BIT)
 
 
+        Matrix.setIdentityM(modelMatrix, 0)
+        Matrix.setIdentityM(viewMatrix, 0)
+        Matrix.setIdentityM(projectionMatrix, 0)
+        Matrix.setIdentityM(mvpMatrix, 0)
 
+        angle += 1
+        angle %= 360
+        //设置 M
+        Matrix.rotateM(modelMatrix, 0, angle, 0.5f * angle / 360, 1f * angle / 360, 0f)
+
+        //设置 V
+        Matrix.translateM(viewMatrix, 0, 0f, 0f, -3.5f)
+
+        //设置 P
+        Matrix.perspectiveM(projectionMatrix, 0, 45f, aspectRatio, 0.3f, 100f)
+
+        //组合成 mvp,先 v x m
+        Matrix.multiplyMM(mvpMatrix, 0, viewMatrix, 0, modelMatrix, 0)
+        //然后是 p x v x m
+        Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, mvpMatrix, 0)
+
+        val u_Matrix = getUniform("u_Matrix")
+        GLES30.glUniformMatrix4fv(u_Matrix, 1, false, mvpMatrix, 0)
         //useVaoVboAndEbo
         texture?.apply {
             GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, id)
         }
 
         GLES30.glBindVertexArray(vao[0])
-        GLES30.glDrawElements(GLES30.GL_TRIANGLE_STRIP, 6, GLES30.GL_UNSIGNED_INT, 0)
+        //GLES30.glDrawElements(GLES30.GL_TRIANGLE_STRIP, 6, GLES30.GL_UNSIGNED_INT, 0)
+        GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0, 36)
+
     }
 
     val vbo = IntArray(2)
@@ -214,17 +234,17 @@ class L7_ShapeRender_1 : BaseRender() {
             GLES30.GL_STATIC_DRAW
         )
         //创建 ebo
-        GLES30.glGenBuffers(1, ebo, 0)
-        //绑定 ebo 到上下文
-        GLES30.glBindBuffer(GLES30.GL_ELEMENT_ARRAY_BUFFER, ebo[0])
-        //昂丁
-        GLES30.glBufferData(
-            GLES30.GL_ELEMENT_ARRAY_BUFFER,
-            indexData.capacity() * 4,
-            indexData,
-            GLES30.GL_STATIC_DRAW
-        )
-
+        /* GLES30.glGenBuffers(1, ebo, 0)
+         //绑定 ebo 到上下文
+         GLES30.glBindBuffer(GLES30.GL_ELEMENT_ARRAY_BUFFER, ebo[0])
+         //昂丁
+         GLES30.glBufferData(
+             GLES30.GL_ELEMENT_ARRAY_BUFFER,
+             indexData.capacity() * 4,
+             indexData,
+             GLES30.GL_STATIC_DRAW
+         )
+ */
         //绘制位置
         GLES30.glVertexAttribPointer(
             0, 3, GLES30.GL_FLOAT,
@@ -252,6 +272,18 @@ class L7_ShapeRender_1 : BaseRender() {
     }
 
 
-
+    override fun show(context: Context) {
+        view = GLSurfaceView(context).apply {
+            setEGLContextClientVersion(3)
+            setEGLConfigChooser(false)
+            setOnClickListener {
+                requestRender()
+            }
+            visibility = View.VISIBLE
+            setRenderer(this@L7_ShapeRender_2)
+            //等待点击才会刷帧
+            renderMode = GLSurfaceView.RENDERMODE_CONTINUOUSLY
+        }
+    }
 }
 
