@@ -29,7 +29,8 @@ class MainActivity : AppCompatActivity() {
             RenderItem(L5_ShapeRender::class.java, "L5 - 优化数据VBO,VAO"),
             RenderItem(L6_ShapeRender::class.java, "L6 - 纹理"),
             RenderItem(L6_ShapeRender_1::class.java, "L6-1 - 多纹理-图片混合"),
-            RenderItem(L7_ShapeRender::class.java, "L7 - 矩阵变换"),
+            RenderItem(L7_ShapeRender::class.java, "L7 - Matrix变换"),
+            RenderItem(L7_ShapeRender_1::class.java, "L7-1 - 透视投影"),
         )
         with(recycleView) {
             layoutManager = LinearLayoutManager(this@MainActivity)
