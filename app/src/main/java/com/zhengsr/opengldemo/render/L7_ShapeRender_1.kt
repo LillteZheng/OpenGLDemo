@@ -135,10 +135,10 @@ class L7_ShapeRender_1 : BaseRender() {
 
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
         GLES30.glViewport(0, 0, width, height)
-        val aspectRatio = if (width > height) {
-            width.toFloat() / height
-        } else {
+        val aspectRatio  = if (width > height) {
             height.toFloat() / width
+        } else {
+            width.toFloat() / height
         }
         //获取矩阵
         val orthogonalMatrix = getIdentity()
@@ -158,7 +158,7 @@ class L7_ShapeRender_1 : BaseRender() {
         Matrix.multiplyMM(modelMatrix,0, modelMatrix,0,orthogonalMatrix,0)
 
         //设置 V
-        Matrix.translateM(viewMatrix,0,0f,0f,-1.5f)
+        Matrix.translateM(viewMatrix,0,0f,0f,-3f)
 
         //设置 P
         Matrix.perspectiveM(projectionMatrix,0,45f,aspectRatio,0.3f,100f)

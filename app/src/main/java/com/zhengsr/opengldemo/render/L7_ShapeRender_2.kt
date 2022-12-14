@@ -134,6 +134,16 @@ class L7_ShapeRender_2 : BaseRender() {
     }
 
 
+    //Triangle.kt
+    var cubePosition = floatArrayOf(
+
+        0.0f, 0.0f, 0.0f,
+        1.2f, 1.0f, -1.0f,
+        -1.5f, -2.2f, -2.5f,
+        -1.3f, 2.0f, -2.5f
+    )
+
+
     // private var colorData = BufferUtil.createFloatBuffer(COLOR_DATA)
 
 
@@ -174,38 +184,51 @@ class L7_ShapeRender_2 : BaseRender() {
         //步骤1：使用glClearColor设置的颜色，刷新Surface
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT or GLES30.GL_DEPTH_BUFFER_BIT)
 
-
-        Matrix.setIdentityM(modelMatrix, 0)
-        Matrix.setIdentityM(viewMatrix, 0)
-        Matrix.setIdentityM(projectionMatrix, 0)
-        Matrix.setIdentityM(mvpMatrix, 0)
-
-        angle += 1
-        angle %= 360
-        //设置 M
-        Matrix.rotateM(modelMatrix, 0, angle, 0.5f * angle / 360, 1f * angle / 360, 0f)
-
-        //设置 V
-        Matrix.translateM(viewMatrix, 0, 0f, 0f, -3.5f)
-
-        //设置 P
-        Matrix.perspectiveM(projectionMatrix, 0, 45f, aspectRatio, 0.3f, 100f)
-
-        //组合成 mvp,先 v x m
-        Matrix.multiplyMM(mvpMatrix, 0, viewMatrix, 0, modelMatrix, 0)
-        //然后是 p x v x m
-        Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, mvpMatrix, 0)
-
-        val u_Matrix = getUniform("u_Matrix")
-        GLES30.glUniformMatrix4fv(u_Matrix, 1, false, mvpMatrix, 0)
-        //useVaoVboAndEbo
-        texture?.apply {
-            GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, id)
-        }
-
         GLES30.glBindVertexArray(vao[0])
-        //GLES30.glDrawElements(GLES30.GL_TRIANGLE_STRIP, 6, GLES30.GL_UNSIGNED_INT, 0)
-        GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0, 36)
+        for (i in 0..boxCount) {
+            Matrix.setIdentityM(modelMatrix, 0)
+            Matrix.setIdentityM(viewMatrix, 0)
+            Matrix.setIdentityM(projectionMatrix, 0)
+            Matrix.setIdentityM(mvpMatrix, 0)
+
+            angle += 1
+            angle %= 360
+            //设置 M
+            Matrix.rotateM(
+                modelMatrix, 0,
+                angle,
+                cubePosition[i *3] + 0.5f,
+                cubePosition[i *3 + 1] + 1.0f,
+                cubePosition[i  *3+ 2]
+            )
+
+            //设置 V
+            Matrix.translateM(
+                viewMatrix,
+                0,
+                cubePosition[i *3],
+                cubePosition[i*3  + 1],
+                cubePosition[i *3+ 2] - 7f
+            )
+
+            //设置 P
+            Matrix.perspectiveM(projectionMatrix, 0, 45f, aspectRatio, 0.3f, 100f)
+
+            //组合成 mvp,先 v x m
+            Matrix.multiplyMM(mvpMatrix, 0, viewMatrix, 0, modelMatrix, 0)
+            //然后是 p x v x m
+            Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, mvpMatrix, 0)
+
+            val u_Matrix = getUniform("u_Matrix")
+            GLES30.glUniformMatrix4fv(u_Matrix, 1, false, mvpMatrix, 0)
+            //useVaoVboAndEbo
+            texture?.apply {
+                GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, id)
+            }
+
+            //GLES30.glDrawElements(GLES30.GL_TRIANGLE_STRIP, 6, GLES30.GL_UNSIGNED_INT, 0)
+            GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0, 36)
+        }
 
     }
 
@@ -271,19 +294,39 @@ class L7_ShapeRender_2 : BaseRender() {
         GLES30.glBindBuffer(GLES30.GL_ELEMENT_ARRAY_BUFFER, 0)
     }
 
-
+    private var boxCount = 0
     override fun show(context: Context) {
-        view = GLSurfaceView(context).apply {
+        //super.show(context)
+        val frame = FrameLayout(context)
+        val glView = GLSurfaceView(context).apply {
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
             setEGLContextClientVersion(3)
             setEGLConfigChooser(false)
-            setOnClickListener {
-                requestRender()
-            }
-            visibility = View.VISIBLE
             setRenderer(this@L7_ShapeRender_2)
-            //等待点击才会刷帧
             renderMode = GLSurfaceView.RENDERMODE_CONTINUOUSLY
+            frame.addView(this)
         }
+        val linear = AutoNextLineLinearLayout(context).apply {
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+            orientation = LinearLayout.HORIZONTAL
+            frame.addView(this)
+        }
+        linear.addBtn("单个3D") {
+            boxCount = 0
+        }
+
+        linear.addBtn("多个3D") {
+            boxCount = 3
+        }
+
+
+        view = frame
     }
 }
 
