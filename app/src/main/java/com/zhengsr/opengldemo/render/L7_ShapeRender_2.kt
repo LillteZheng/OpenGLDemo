@@ -5,7 +5,6 @@ import android.opengl.GLES30
 import android.opengl.GLSurfaceView
 import android.opengl.Matrix
 import android.util.Log
-import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.LinearLayout
@@ -17,7 +16,6 @@ import com.zhengsr.opengldemo.utils.TextureBean
 import com.zhengsr.opengldemo.utils.loadTexture
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
-import kotlin.math.max
 
 /**
  * @author by zhengshaorui 2022/9/16
@@ -134,8 +132,7 @@ class L7_ShapeRender_2 : BaseRender() {
     }
 
 
-    //Triangle.kt
-    var cubePosition = floatArrayOf(
+    var mulPosition = floatArrayOf(
 
         0.0f, 0.0f, 0.0f,
         1.2f, 1.2f, -1.0f,
@@ -181,54 +178,8 @@ class L7_ShapeRender_2 : BaseRender() {
     val projectionMatrix = getIdentity()
     val mvpMatrix = getIdentity()
     override fun onDrawFrame(gl: GL10?) {
-        //步骤1：使用glClearColor设置的颜色，刷新Surface
-        GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT or GLES30.GL_DEPTH_BUFFER_BIT)
-
-        GLES30.glBindVertexArray(vao[0])
-        for (i in 0..boxCount) {
-            Matrix.setIdentityM(modelMatrix, 0)
-            Matrix.setIdentityM(viewMatrix, 0)
-            Matrix.setIdentityM(projectionMatrix, 0)
-            Matrix.setIdentityM(mvpMatrix, 0)
-
-            angle += 1
-            angle %= 360
-            //设置 M
-            Matrix.rotateM(
-                modelMatrix, 0,
-                angle,
-                cubePosition[i *3] + 0.5f,
-                cubePosition[i *3 + 1] + 1.0f,
-                cubePosition[i  *3+ 2]
-            )
-
-            //设置 V
-            Matrix.translateM(
-                viewMatrix,
-                0,
-                cubePosition[i *3],
-                cubePosition[i*3  + 1],
-                cubePosition[i *3+ 2] - 7f
-            )
-
-            //设置 P
-            Matrix.perspectiveM(projectionMatrix, 0, 45f, aspectRatio, 0.3f, 100f)
-
-            //组合成 mvp,先 v x m
-            Matrix.multiplyMM(mvpMatrix, 0, viewMatrix, 0, modelMatrix, 0)
-            //然后是 p x v x m
-            Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, mvpMatrix, 0)
-
-            val u_Matrix = getUniform("u_Matrix")
-            GLES30.glUniformMatrix4fv(u_Matrix, 1, false, mvpMatrix, 0)
-            //useVaoVboAndEbo
-            texture?.apply {
-                GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, id)
-            }
-
-            //GLES30.glDrawElements(GLES30.GL_TRIANGLE_STRIP, 6, GLES30.GL_UNSIGNED_INT, 0)
-            GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0, 36)
-        }
+      // notUseDeepTest()
+        useDeepTest()
 
     }
 
@@ -328,5 +279,104 @@ class L7_ShapeRender_2 : BaseRender() {
 
         view = frame
     }
+
+    private fun notUseDeepTest() {
+        GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT )
+
+        GLES30.glBindVertexArray(vao[0])
+        Matrix.setIdentityM(modelMatrix, 0)
+        Matrix.setIdentityM(viewMatrix, 0)
+        Matrix.setIdentityM(projectionMatrix, 0)
+        Matrix.setIdentityM(mvpMatrix, 0)
+
+        angle += 1
+        angle %= 360
+        //设置 M
+        Matrix.rotateM(
+            modelMatrix, 0,
+            angle,
+            0.5f,
+            1.0f,
+            0f
+        )
+
+        //设置 V
+        Matrix.translateM(
+            viewMatrix,
+            0,
+            0f,
+            0f,
+            -4f
+        )
+
+        //设置 P
+        Matrix.perspectiveM(projectionMatrix, 0, 45f, aspectRatio, 0.3f, 100f)
+
+        //组合成 mvp,先 v x m
+        Matrix.multiplyMM(mvpMatrix, 0, viewMatrix, 0, modelMatrix, 0)
+        //然后是 p x v x m
+        Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, mvpMatrix, 0)
+
+        val u_Matrix = getUniform("u_Matrix")
+        GLES30.glUniformMatrix4fv(u_Matrix, 1, false, mvpMatrix, 0)
+        //useVaoVboAndEbo
+        texture?.apply {
+            GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, id)
+        }
+
+        //GLES30.glDrawElements(GLES30.GL_TRIANGLE_STRIP, 6, GLES30.GL_UNSIGNED_INT, 0)
+        GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0, 36)
+    }
+    private fun useDeepTest(){
+        //步骤1：使用glClearColor设置的颜色，刷新Surface
+        GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT or GLES30.GL_DEPTH_BUFFER_BIT)
+
+        GLES30.glBindVertexArray(vao[0])
+        for (i in 0..boxCount) {
+            Matrix.setIdentityM(modelMatrix, 0)
+            Matrix.setIdentityM(viewMatrix, 0)
+            Matrix.setIdentityM(projectionMatrix, 0)
+            Matrix.setIdentityM(mvpMatrix, 0)
+
+            angle += 1
+            angle %= 360
+            //设置 M
+            Matrix.rotateM(
+                modelMatrix, 0,
+                angle,
+                mulPosition[i * 3] + 0.5f,
+                mulPosition[i * 3 + 1] + 1.0f,
+                mulPosition[i * 3 + 2]
+            )
+
+            //设置 V
+            Matrix.translateM(
+                viewMatrix,
+                0,
+                mulPosition[i * 3],
+                mulPosition[i * 3 + 1],
+                mulPosition[i * 3 + 2] - 4f - boxCount
+            )
+
+            //设置 P
+            Matrix.perspectiveM(projectionMatrix, 0, 45f, aspectRatio, 0.3f, 100f)
+
+            //组合成 mvp,先 v x m
+            Matrix.multiplyMM(mvpMatrix, 0, viewMatrix, 0, modelMatrix, 0)
+            //然后是 p x v x m
+            Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, mvpMatrix, 0)
+
+            val u_Matrix = getUniform("u_Matrix")
+            GLES30.glUniformMatrix4fv(u_Matrix, 1, false, mvpMatrix, 0)
+            //useVaoVboAndEbo
+            texture?.apply {
+                GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, id)
+            }
+
+            //GLES30.glDrawElements(GLES30.GL_TRIANGLE_STRIP, 6, GLES30.GL_UNSIGNED_INT, 0)
+            GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0, 36)
+        }
+    }
+
 }
 

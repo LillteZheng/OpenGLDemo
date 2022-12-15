@@ -1,7 +1,5 @@
 
 
-
-# VideoDemo
 音视频学习demo,正在升级打怪，加油鸭~
 
 [Android 音视频开发(一) -- 使用AudioRecord 录制PCM(录音)；AudioTrack播放音频](https://blog.csdn.net/u011418943/article/details/107224028)
@@ -47,4 +45,7 @@
 
 [Android OpenGL ES 学习(七) – 纹理 ](https://blog.csdn.net/u011418943/article/details/128163235?spm=1001.2014.3001.5502)
 
+[Android OpenGL ES 学习(八) –矩阵变换](https://blog.csdn.net/u011418943/article/details/128320561?spm=1001.2014.3001.5502)
+
+[Android OpenGL ES 学习(九) – 坐标系统和。实现3D效果](https://blog.csdn.net/u011418943/article/details/128328250)
 

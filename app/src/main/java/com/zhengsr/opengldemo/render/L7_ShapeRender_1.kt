@@ -80,33 +80,7 @@ class L7_ShapeRender_1 : BaseRender() {
             1, 2, 3  // 第二个三角形
         )
 
-        //  private const val U_COLOR = "u_Color"
 
-
-        /*private val modelMatrix = floatArrayOf(
-            1f, 0f, 0f, 0f,
-            0f, 1f, 0f, 0f,
-            0f, 0f, 1f, 0f,
-            0f, 0f, 0f, 1f
-        )
-        private val viewMatrix = floatArrayOf(
-            1f, 0f, 0f, 0f,
-            0f, 1f, 0f, 0f,
-            0f, 0f, 1f, 0f,
-            0f, 0f, 0f, 1f
-        )
-        private val projectMatrix = floatArrayOf(
-            1f, 0f, 0f, 0f,
-            0f, 1f, 0f, 0f,
-            0f, 0f, 1f, 0f,
-            0f, 0f, 0f, 1f
-        )
-        private val mvpMatrix = floatArrayOf(
-            1f, 0f, 0f, 0f,
-            0f, 1f, 0f, 0f,
-            0f, 0f, 1f, 0f,
-            0f, 0f, 0f, 1f
-        )*/
         private fun getIdentity() =  floatArrayOf(
             1f, 0f, 0f, 0f,
             0f, 1f, 0f, 0f,
@@ -141,27 +115,21 @@ class L7_ShapeRender_1 : BaseRender() {
             width.toFloat() / height
         }
         //获取矩阵
-        val orthogonalMatrix = getIdentity()
         val modelMatrix = getIdentity()
         val viewMatrix = getIdentity()
         val projectionMatrix = getIdentity()
         val mvpMatrix = getIdentity()
 
 
-        if (width > height) {
-            Matrix.orthoM(orthogonalMatrix, 0, -aspectRatio, aspectRatio, -1f, 1f, -1f, 1f)
-        } else {
-            Matrix.orthoM(orthogonalMatrix, 0, -1f, 1f, -aspectRatio, aspectRatio, -1f, 1f)
-        }
+
         //设置 M
         Matrix.rotateM(modelMatrix,0,-55f,1f,0f,0f)
-        Matrix.multiplyMM(modelMatrix,0, modelMatrix,0,orthogonalMatrix,0)
 
         //设置 V
         Matrix.translateM(viewMatrix,0,0f,0f,-3f)
 
         //设置 P
-        Matrix.perspectiveM(projectionMatrix,0,45f,aspectRatio,0.3f,100f)
+        Matrix.perspectiveM(projectionMatrix,0,45f,aspectRatio,0.1f,100f)
 
         //组合成 mvp,先 v x m
         Matrix.multiplyMM(mvpMatrix,0, viewMatrix,0, modelMatrix,0)
@@ -217,7 +185,7 @@ class L7_ShapeRender_1 : BaseRender() {
         GLES30.glGenBuffers(1, ebo, 0)
         //绑定 ebo 到上下文
         GLES30.glBindBuffer(GLES30.GL_ELEMENT_ARRAY_BUFFER, ebo[0])
-        //昂丁
+        //EBO 数值
         GLES30.glBufferData(
             GLES30.GL_ELEMENT_ARRAY_BUFFER,
             indexData.capacity() * 4,
