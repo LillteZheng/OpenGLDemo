@@ -32,6 +32,7 @@ class MainActivity : AppCompatActivity() {
             RenderItem(L7_ShapeRender::class.java, "L7 - Matrix变换"),
             RenderItem(L7_ShapeRender_1::class.java, "L7-1 - 透视投影"),
             RenderItem(L7_ShapeRender_2::class.java, "L7-1 - 3D效果"),
+            RenderItem(L8_ShapeRender::class.java, "L8 - 模拟EGL环境,不使用GlSurfaceView"),
         )
         with(recycleView) {
             layoutManager = LinearLayoutManager(this@MainActivity)
