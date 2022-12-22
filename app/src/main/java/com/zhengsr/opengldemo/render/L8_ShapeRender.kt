@@ -254,15 +254,11 @@ class L8_ShapeRender : BaseRender() {
     override fun show(context: Context) {
         //super.show(context)
         val frame = FrameLayout(context)
-        val glView = GLSurfaceView(context).apply {
+        EglSurfaceView(context).apply {
             layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
-            setEGLContextClientVersion(3)
-            setEGLConfigChooser(false)
-            setRenderer(this@L8_ShapeRender)
-            renderMode = GLSurfaceView.RENDERMODE_CONTINUOUSLY
             frame.addView(this)
         }
         val linear = AutoNextLineLinearLayout(context).apply {
@@ -383,6 +379,7 @@ class L8_ShapeRender : BaseRender() {
         }
     }
 
+
     /**
      * 自定义一个 SurfaceView，里面的线程模拟 EGL 环境
      */
@@ -408,6 +405,9 @@ class L8_ShapeRender : BaseRender() {
             eglThread?.release()
         }
 
+        /**
+         * gl线程，里面包含 EGL 创建流程
+         */
         inner class EglThread(private val surface: Surface) : Thread() {
             private var isExit = false
             private var isFirst = true
@@ -425,10 +425,7 @@ class L8_ShapeRender : BaseRender() {
                         release()
                         break
                     }
-                    try {
-                        sleep(16)
-                    } catch (e: Exception) {
-                    }
+
                     if (isFirst) {
                         isFirst = false
                         //回调给主类
@@ -441,6 +438,10 @@ class L8_ShapeRender : BaseRender() {
                     eglHelper?.let {
                         this@L8_ShapeRender.onDrawFrame(null)
                         it.swapBuffers()
+                    }
+                    try {
+                        sleep(16)
+                    } catch (e: Exception) {
                     }
                 }
             }
@@ -507,7 +508,7 @@ class L8_ShapeRender : BaseRender() {
                 throw RuntimeException("eglChooseConfig#2 failed")
             }
 
-            //6、创建EglContext
+            //6、创建EglContext，3 表示OpenGL 版本号
             val  attrib_list = intArrayOf(
                 EGL14.EGL_CONTEXT_CLIENT_VERSION, 3,
                 EGL10.EGL_NONE
