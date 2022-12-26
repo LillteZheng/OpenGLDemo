@@ -33,6 +33,8 @@ class MainActivity : AppCompatActivity() {
             RenderItem(L7_ShapeRender_1::class.java, "L7-1 - 透视投影"),
             RenderItem(L7_ShapeRender_2::class.java, "L7-1 - 3D效果"),
             RenderItem(L8_ShapeRender::class.java, "L8 - 模拟EGL环境,不使用GlSurfaceView"),
+            RenderItem(L9_Render::class.java, "L9 - 渲染YUV视频"),
+            RenderItem(L9_Render_1::class.java, "L9-1 - 渲染视频,抖音特效"),
         )
         with(recycleView) {
             layoutManager = LinearLayoutManager(this@MainActivity)
@@ -40,7 +42,7 @@ class MainActivity : AppCompatActivity() {
             testAdapter.submitList(data)
             testAdapter.setOnItemClickListener { adapter, view, position ->
                 curRender = getRenderer(data[position].className)?.apply {
-                    show(this@MainActivity)
+                    showUI(this@MainActivity)
                     recycleView.visibility = View.GONE
                     rootContent.addView(this.view)
                 }
