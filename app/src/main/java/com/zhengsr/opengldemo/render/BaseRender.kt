@@ -18,11 +18,19 @@ import kotlinx.android.synthetic.main.activity_main.*
 abstract class BaseRender : GLSurfaceView.Renderer {
     companion object {
         private const val TAG = "BaseRender"
+        const val YUV_FILE = "video_288_512.yuv"
     }
 
     protected var programId = 0
     var view: View? = null
-    open fun show(context: Context) {
+    protected lateinit var context: Context
+    fun showUI(context: Context){
+        this.context = context
+        show(context)
+    }
+
+
+    protected open fun show(context: Context) {
         view = GLSurfaceView(context).apply {
             setEGLContextClientVersion(3)
             setEGLConfigChooser(false)
@@ -143,7 +151,7 @@ abstract class BaseRender : GLSurfaceView.Renderer {
             )
             text = msg
             setOnClickListener {
-               block.invoke()
+                block.invoke()
             }
             addView(this)
         }
