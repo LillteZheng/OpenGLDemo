@@ -23,6 +23,8 @@
 
 [Android OpenGL ES 学习(十) – GLSurfaceView 源码解析GL线程以及自定义 EGL](https://blog.csdn.net/u011418943/article/details/128399619?spm=1001.2014.3001.5502)
 
+[Android OpenGL ES 学习(十一) –渲染YUV视频以及视频抖音特效](https://blog.csdn.net/u011418943/article/details/128421098?spm=1001.2014.3001.5502)
+
 
 
 音视频学习demo,正在升级打怪，加油鸭~
