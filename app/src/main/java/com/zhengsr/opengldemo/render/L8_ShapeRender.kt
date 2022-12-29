@@ -458,8 +458,6 @@ class L8_ShapeRender : BaseRender() {
                 isSizeChange = true
             }
         }
-
-
     }
     inner class EglHelper {
         private var egl: EGL10? = null

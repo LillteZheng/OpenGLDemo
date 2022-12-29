@@ -4,7 +4,9 @@ import android.content.Context
 import android.graphics.BitmapFactory
 import android.opengl.GLES30
 import android.opengl.GLUtils
+import android.util.DisplayMetrics
 import android.util.Log
+import android.view.WindowManager
 
 /**
  * @author by zhengshaorui 2022/12/3
@@ -66,3 +68,42 @@ fun loadTexture(TAG:String,context: Context,resId:Int):TextureBean?{
 
     return bean
 }
+
+//不受虚拟按键影响，如华为mate 9将出现 1080 * 1920 这样正常的分辨率
+fun getRealHeight(context: Context): Int {
+    var height = 0
+    val display = (context
+        .getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay
+    val dm = DisplayMetrics()
+    val c: Class<*>
+    try {
+        c = Class.forName("android.view.Display")
+        val method = c.getMethod("getRealMetrics", DisplayMetrics::class.java)
+        method.invoke(display, dm)
+        height = dm.heightPixels
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+    return height
+}
+
+//不受虚拟按键影响，如华为mate 9将出现 1080 * 1920 这样正常的分辨率
+fun getRealWidth(context: Context): Int {
+    var width = 0
+    val display = (context
+        .getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay
+    val dm = DisplayMetrics()
+    val c: Class<*>
+    try {
+        c = Class.forName("android.view.Display")
+        val method = c.getMethod("getRealMetrics", DisplayMetrics::class.java)
+        method.invoke(display, dm)
+        width = dm.widthPixels
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+    return width
+}
+
+
+

@@ -4,13 +4,16 @@ import android.content.Context
 import android.opengl.GLSurfaceView
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.chad.library.adapter.base.BaseQuickAdapter
 import com.chad.library.adapter.base.viewholder.QuickViewHolder
 import com.zhengsr.opengldemo.render.*
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlin.experimental.and
 
 class MainActivity : AppCompatActivity() {
 
@@ -19,7 +22,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
 
         val data = arrayListOf<RenderItem>(
             RenderItem(L1_PointRender::class.java, "L1 - 基础类型，点"),
@@ -35,6 +37,7 @@ class MainActivity : AppCompatActivity() {
             RenderItem(L8_ShapeRender::class.java, "L8 - 模拟EGL环境,不使用GlSurfaceView"),
             RenderItem(L9_Render::class.java, "L9 - 渲染YUV视频"),
             RenderItem(L9_Render_1::class.java, "L9-1 - 渲染视频,抖音特效"),
+            RenderItem(L10_Render::class.java, "L10 - MediaCodec+OpenGL实现视频渲染"),
         )
         with(recycleView) {
             layoutManager = LinearLayoutManager(this@MainActivity)
@@ -84,7 +87,6 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
-
 
 
     override fun onDestroy() {
