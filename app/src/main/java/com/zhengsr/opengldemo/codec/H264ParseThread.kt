@@ -65,11 +65,11 @@ class H264ParseThread(val inputStream: InputStream, val listener: IFrameListener
                 //修改当前帧的大小
                 frameLen += readLen
                 //寻找第一帧
-                var firstHeadIndex = findHeader(frame, 0, frameLen, formatLength)
+                var firstHeadIndex = findHeader(frame, 0, frameLen)
                 while (firstHeadIndex >= 0) {
                     //找第二帧,从第一帧之后的间隔开始找
                     val secondFrameIndex =
-                        findHeader(frame, firstHeadIndex + 100, frameLen, formatLength)
+                        findHeader(frame, firstHeadIndex + 100, frameLen)
                     if (secondFrameIndex > 0) {
                         //找到第二帧
                         listener.onFrame(frame, firstHeadIndex, secondFrameIndex - firstHeadIndex)
@@ -80,7 +80,7 @@ class H264ParseThread(val inputStream: InputStream, val listener: IFrameListener
                         frameLen = temp.size
 
                         //继续寻找下一帧
-                        firstHeadIndex = findHeader(frame, 0, frameLen, formatLength)
+                        firstHeadIndex = findHeader(frame, 0, frameLen)
                     } else {
                         //没有找到，继续循环去找
                         firstHeadIndex = -1
@@ -101,9 +101,9 @@ class H264ParseThread(val inputStream: InputStream, val listener: IFrameListener
         isFinish = true
     }
 
-    private fun findHeader(data: ByteArray, offset: Int, count: Int, formatLength: Int): Int {
+    private fun findHeader(data: ByteArray, offset: Int, count: Int): Int {
         for (i in offset until count) {
-            if (isFrameHeader(data, i, formatLength)) {
+            if (isFrameHeader(data, i)) {
                 return i
             }
         }
@@ -111,29 +111,19 @@ class H264ParseThread(val inputStream: InputStream, val listener: IFrameListener
 
     }
 
-    private fun isFrameHeader(data: ByteArray, index: Int, formatLength: Int): Boolean {
+    private fun isFrameHeader(data: ByteArray, index: Int): Boolean {
         if (data.size < 5) {
             return false
         }
         val d1 = data[index].toInt() == 0
         val d2 = data[index + 1].toInt() == 0
-
-        if (formatLength == 4) {
-            val d3 = data[index + 2].toInt() == 0
-            val d4 = data[index + 3].toInt() == 1
-            val byte = data[index + 4]
-            val d5 = isFrameHeadType(byte)
-
-            if (d1 && d2 && d3 && d4 && d5) {
-                return true
-            }
-        } else if (formatLength == 3) {
-            val d3 = data[index + 2].toInt() == 1
-            val d4 = isFrameHeadType(data[index + 3])
-            if (d1 && d2 && d3 && d4) {
-                return true
-            }
+        val isNaluHeader = d1 && d2
+        if (isNaluHeader && data[index + 2].toInt() == 1 && isFrameHeadType(data[index + 3])){
+            return true
+        }else if (isNaluHeader && data[index + 2].toInt() == 0 && data[index + 3].toInt() == 1 && isFrameHeadType(data[index + 4])){
+            return true
         }
+
         return false
     }
 

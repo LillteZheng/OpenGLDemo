@@ -7,11 +7,16 @@ import android.opengl.GLES30
 import android.opengl.GLSurfaceView
 import android.util.Log
 import android.view.Surface
+import android.view.ViewGroup
+import android.widget.FrameLayout
+import android.widget.LinearLayout
+import com.zhengsr.opengldemo.AutoNextLineLinearLayout
 import com.zhengsr.opengldemo.codec.decoder.VideoDncoder
 import com.zhengsr.opengldemo.utils.BufferUtil
 import com.zhengsr.opengldemo.codec.H264ParseThread
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
+import kotlin.concurrent.thread
 
 /**
  * @author by zhengshaorui 2022/9/16
@@ -44,7 +49,7 @@ class L10_Render : BaseRender() {
         /**
          * 片段着色器
          */
-        private const val FRAGMENT_SHADER = """#version 300 es
+        private var FRAGMENT_SHADER = """#version 300 es
             precision mediump float;
             out vec4 FragColor;
             in vec2 vTexture;
@@ -154,7 +159,6 @@ class L10_Render : BaseRender() {
     override fun onDrawFrame(gl: GL10?) {
         //步骤1：使用glClearColor设置的颜色，刷新Surface
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT)
-        // Log.d(TAG, "zsr onDrawFrame: $surfaceTexture")
         surfaceTexture?.updateTexImage()
         GLES30.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textures[0])
         GLES30.glBindVertexArray(vao[0])
@@ -184,19 +188,94 @@ class L10_Render : BaseRender() {
 
     }
 
-
+    private lateinit var glView: GLSurfaceView
     override fun show(context: Context) {
         super.show(context)
-        val glSurfaceView = view as GLSurfaceView
-        glSurfaceView.renderMode = GLSurfaceView.RENDERMODE_CONTINUOUSLY
+        val frame = FrameLayout(context)
+        glView = GLSurfaceView(context).apply {
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+            setEGLContextClientVersion(3)
+            setEGLConfigChooser(false)
+            setRenderer(this@L10_Render)
+            renderMode = GLSurfaceView.RENDERMODE_CONTINUOUSLY
+            frame.addView(this)
+        }
+        val linear = AutoNextLineLinearLayout(context).apply {
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+            orientation = LinearLayout.HORIZONTAL
+            frame.addView(this)
+        }
+        linear.addBtn("还原") {
+            val msg = "FragColor = texture(ourTexture,vTexture);"
+            loadFragmentVertex(msg, frame, linear)
+        }
+        linear.addBtn("灰色") {
+            val msg = """
+                    vec4 temColor = texture(ourTexture,vTexture);
+                    float gray = temColor.r * 0.2126 + temColor.g * 0.7152 + temColor.b * 0.0722;
+                    FragColor = vec4(gray,gray,gray,1.0);
+            """
+            loadFragmentVertex(msg, frame, linear)
+        }
+
+        linear.addBtn("反色") {
+            val msg = """
+                    vec4 temColor = texture(ourTexture,vTexture);
+                    float r = 1.0- temColor.r;
+                    float g = 1.0- temColor.g;
+                    float b = 1.0- temColor.b;
+                    FragColor = vec4(r,g,b,1.0);
+            """
+            loadFragmentVertex(msg, frame, linear)
+        }
+
+
+        view = frame
     }
+
+    private fun loadFragmentVertex(vertex: String, frame: ViewGroup, linear: ViewGroup) {
+        thread {
+            release()
+          //  Thread.sleep(100)
+            FRAGMENT_SHADER = changeVertex(vertex)
+            frame.post {
+                frame.removeAllViews()
+                frame.addView(glView)
+                frame.addView(linear)
+            }
+
+        }
+    }
+
+    private fun changeVertex(fragColor: String) = """#version 300 es
+            precision mediump float;
+            out vec4 FragColor;
+            in vec2 vTexture;
+            uniform samplerExternalOES ourTexture;
+            void main() {
+               // FragColor = texture(ourTexture,vTexture);
+               $fragColor
+            }
+        """
 
     override fun dismiss() {
         super.dismiss()
+        release()
+    }
+
+    private fun release() {
         h264ParseThread?.release()
+        h264ParseThread = null
         decoder?.release()
+        decoder = null
         surfaceTexture?.release()
-        //H264Parse.stop()
+        surfaceTexture = null
     }
 
     val vbo = IntArray(2)
