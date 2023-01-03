@@ -58,6 +58,9 @@ class VideoDncoder {
         }
     }
 
+    /**
+     * 喂数据
+     */
     fun feedData(buffer: ByteArray, offset: Int, length: Int) {
         val index = indexQueue.take()
         if (index != -1) {
@@ -75,55 +78,10 @@ class VideoDncoder {
         }
     }
 
-    fun feedData(buffer: ByteBuffer) {
-        val index = indexQueue.take()
-        if (index != -1) {
-            decoder?.let {
-                it.getInputBuffer(index)?.apply {
-                    clear()
-                    val time = System.nanoTime() / 1000000
-                    buffer.rewind()
-                    put(buffer)
-
-
-                    it.queueInputBuffer(index, 0, buffer.capacity(), time, 0)
-                }
-
-            }
-        }
-    }
-    /* fun feedData(frame: VideoFrame) {
-
-         val index = indexQueue.take()
-         if (index != -1) {
-             try {
-                 decoder?.let {
-                     it.getInputBuffer(index)?.apply {
-                         val dataSize = fillFrameToBuf(frame, this)
-                         var timeStamp: Long = frame.timeStamp
-                         if (timeStamp == 0L) {
-                             timeStamp = System.nanoTime() / 1000000
-                         }
-                         it.queueInputBuffer(index,0,dataSize,timeStamp,0)
-                     }
-
-                 }
-             } catch (e: Exception) {
-             }
-         }
-     }*/
-
 
     private fun configAndStart() {
         var width = getRealWidth(MainApplication.context)
         var height = getRealHeight(MainApplication.context)
-        /*if (width > height) {
-            width = 1920;
-            height = 1080
-        } else {
-            width = 1080
-            height = 1920
-        }*/
         if (null == surface || !surface!!.isValid || width < 1 || height < 1) {
             throw  IllegalArgumentException("Some argument is invalid");
         }

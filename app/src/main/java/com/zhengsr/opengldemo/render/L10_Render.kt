@@ -168,7 +168,7 @@ class L10_Render : BaseRender() {
     private var h264ParseThread: H264ParseThread? = null
 
     /**
-     * 读取yuv数据，注意 w，h 为视频宽高
+     * 读取文件
      */
     private fun readFile() {
         val stream = context.resources.assets.open("video.h264")
@@ -182,7 +182,6 @@ class L10_Render : BaseRender() {
                 Thread.sleep(55)
 
             }
-
         })
         h264ParseThread?.start()
 
