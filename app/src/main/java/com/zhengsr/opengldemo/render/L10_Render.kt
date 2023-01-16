@@ -50,11 +50,13 @@ class L10_Render : BaseRender() {
          * 片段着色器
          */
         private var FRAGMENT_SHADER = """#version 300 es
+            #extension GL_OES_EGL_image_external_essl3 : require
             precision mediump float;
             out vec4 FragColor;
             in vec2 vTexture;
             uniform samplerExternalOES ourTexture;
-            void main() {
+            void main() 
+            {
                 FragColor = texture(ourTexture,vTexture);
             }
         """
