@@ -39,6 +39,7 @@ class MainActivity : AppCompatActivity() {
             RenderItem(L9_Render_1::class.java, "L9-1 - 渲染视频,抖音特效"),
             RenderItem(L10_Render::class.java, "L10 - MediaCodec+OpenGL实现视频渲染"),
             RenderItem(L11_Render::class.java, "L11 - FBO 纹理"),
+            RenderItem(L11_Render_1::class.java, "L11-1 - FBO RBO 纹理"),
         )
         with(recycleView) {
             layoutManager = LinearLayoutManager(this@MainActivity)

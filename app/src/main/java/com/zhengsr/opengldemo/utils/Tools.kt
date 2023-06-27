@@ -19,6 +19,7 @@ data class TextureBean(var id: Int, var width: Int,var height: Int) {
 }
 data class FboBean(var fboId: Int, val textureId:Int, var width: Int, var height: Int) {
     constructor():this(-1,-1,0,0)
+    var rboId:Int = -1
 }
 
 
