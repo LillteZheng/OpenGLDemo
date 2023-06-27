@@ -7,6 +7,7 @@ import android.opengl.GLUtils
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.WindowManager
+import androidx.annotation.ReturnThis
 
 /**
  * @author by zhengshaorui 2022/12/3
@@ -15,6 +16,9 @@ import android.view.WindowManager
 
 data class TextureBean(var id: Int, var width: Int,var height: Int) {
     constructor():this(-1,0,0)
+}
+data class FboBean(var fboId: Int, val textureId:Int, var width: Int, var height: Int) {
+    constructor():this(-1,-1,0,0)
 }
 
 
@@ -43,8 +47,8 @@ fun loadTexture(TAG:String,context: Context,resId:Int):TextureBean?{
         }
 
         //纹理环绕
-        GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D,GLES30.GL_TEXTURE_WRAP_S,GLES30.GL_REPEAT)
-        GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D,GLES30.GL_TEXTURE_WRAP_T,GLES30.GL_REPEAT)
+      //  GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D,GLES30.GL_TEXTURE_WRAP_S,GLES30.GL_REPEAT)
+      //  GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D,GLES30.GL_TEXTURE_WRAP_T,GLES30.GL_REPEAT)
 
         //纹理过滤
         GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D,GLES30.GL_TEXTURE_MIN_FILTER,GLES30.GL_NEAREST)
@@ -106,4 +110,6 @@ fun getRealWidth(context: Context): Int {
 }
 
 
-
+fun GLES30.gl(block:GLES30.()->Unit){
+    block.invoke(this)
+}

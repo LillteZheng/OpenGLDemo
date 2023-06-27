@@ -38,12 +38,14 @@ class MainActivity : AppCompatActivity() {
             RenderItem(L9_Render::class.java, "L9 - 渲染YUV视频"),
             RenderItem(L9_Render_1::class.java, "L9-1 - 渲染视频,抖音特效"),
             RenderItem(L10_Render::class.java, "L10 - MediaCodec+OpenGL实现视频渲染"),
+            RenderItem(L11_Render::class.java, "L11 - FBO 纹理"),
         )
         with(recycleView) {
             layoutManager = LinearLayoutManager(this@MainActivity)
             val testAdapter = TestAdapter()
             testAdapter.submitList(data)
             testAdapter.setOnItemClickListener { adapter, view, position ->
+
                 curRender = getRenderer(data[position].className)?.apply {
                     showUI(this@MainActivity)
                     recycleView.visibility = View.GONE

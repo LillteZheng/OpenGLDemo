@@ -17,6 +17,7 @@ import com.zhengsr.opengldemo.codec.H264ParseThread
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 import kotlin.concurrent.thread
+import kotlin.math.log
 
 /**
  * @author by zhengshaorui 2022/9/16
@@ -243,8 +244,9 @@ class L10_Render : BaseRender() {
     private fun loadFragmentVertex(vertex: String, frame: ViewGroup, linear: ViewGroup) {
         thread {
             release()
-          //  Thread.sleep(100)
+            Thread.sleep(100)
             FRAGMENT_SHADER = changeVertex(vertex)
+            Log.d(TAG, "loadFragmentVertex: $FRAGMENT_SHADER")
             frame.post {
                 frame.removeAllViews()
                 frame.addView(glView)
@@ -255,12 +257,13 @@ class L10_Render : BaseRender() {
     }
 
     private fun changeVertex(fragColor: String) = """#version 300 es
+            #extension GL_OES_EGL_image_external_essl3 : require
             precision mediump float;
             out vec4 FragColor;
             in vec2 vTexture;
             uniform samplerExternalOES ourTexture;
-            void main() {
-               // FragColor = texture(ourTexture,vTexture);
+            void main() 
+            {
                $fragColor
             }
         """

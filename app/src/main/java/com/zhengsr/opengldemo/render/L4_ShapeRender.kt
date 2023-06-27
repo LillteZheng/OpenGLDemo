@@ -80,9 +80,9 @@ class L4_ShapeRender : BaseRender() {
 
         private val POINT_COLOR_DATA = floatArrayOf(
             //定点+颜色
-            0f,0.5f,0f,1f,0.5f,0.5f,
-            -0.5f,-0.5f,0f,1f,0f,1f,
-            0.5f,-0.5f,0f,0f,0.5f,1f
+            0f,0.5f,0f, 1f,0.5f,0.5f,
+           -0.5f,-0.5f, 0f,1f,0f,1f,
+            0.5f,-0.5f, 0f,0f,0.5f,1f
         )
       //  private const val U_COLOR = "u_Color"
         private const val U_MATRIX = "u_Matrix"
