@@ -118,6 +118,8 @@ class L11_Render : BaseRender() {
         useVaoVboAndEbo()
     }
     private var aspectRatio = 0f
+    private var screenWidth = 0
+    private var screenHeight = 0
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
         GLES30.glViewport(0, 0, width, height)
         aspectRatio = if (width > height) {
@@ -142,6 +144,8 @@ class L11_Render : BaseRender() {
       // GLES30.glUniformMatrix4fv(uMatrix, 1, false, UnitMatrix, 0)
         Matrix.orthoM(UnitMatrix, 0, -1f, 1f, -1f, 1f, -1f, 1f)
         GLES30.glUniformMatrix4fv(uMatrix, 1, false, UnitMatrix, 0)
+        screenWidth = width
+        screenHeight = height
 
     }
     private var image: ImageView? = null
@@ -208,7 +212,7 @@ class L11_Render : BaseRender() {
 
 
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT )
-        GLES30.glViewport(0, 0, 3840, 2160)
+        GLES30.glViewport(0, 0, screenWidth, screenHeight)
         resetMatrix()
         if (aspectRatio > 1) {
             Matrix.orthoM(UnitMatrix, 0, -aspectRatio, aspectRatio, -1f, 1f, -1f, 1f)

@@ -1,20 +1,22 @@
 package com.zhengsr.opengldemo.render
 
 import android.content.Context
+import android.graphics.Color
 import android.graphics.SurfaceTexture
-import android.opengl.GLES11Ext
-import android.opengl.GLES20
-import android.opengl.GLES30
-import android.opengl.GLSurfaceView
+import android.opengl.*
 import android.util.Log
 import android.view.Surface
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.LinearLayout
 import com.zhengsr.opengldemo.AutoNextLineLinearLayout
+import com.zhengsr.opengldemo.R
 import com.zhengsr.opengldemo.codec.H264ParseThread
 import com.zhengsr.opengldemo.codec.decoder.VideoDncoder
 import com.zhengsr.opengldemo.utils.BufferUtil
+import com.zhengsr.opengldemo.utils.FboBean
+import com.zhengsr.opengldemo.utils.readBufferPixelToBitmap
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 import kotlin.concurrent.thread
@@ -24,7 +26,7 @@ import kotlin.concurrent.thread
  * describe：视频渲染
  *
  */
-class L10_Render : BaseRender() {
+class L11_Render_2 : BaseRender() {
 
 
     companion object {
@@ -33,22 +35,25 @@ class L10_Render : BaseRender() {
          * 修改顶部着色器的坐标值，即增加个举证x向量
          */
         private const val VERTEX_SHADER = """#version 300 es
+                uniform mat4 u_Matrix;
                 layout(location = 0) in vec4 a_Position;
                 layout(location = 1) in vec2 aTexture;
                 out vec2 vTexture;
                 void main()
                 {
                     // 矩阵与向量相乘得到最终的位置
-                    gl_Position = a_Position;
+                    gl_Position = u_Matrix * a_Position;
                     vTexture = aTexture;
                 
                 }
         """
-        private val TAG = L10_Render::class.java.simpleName
+
+        private val TAG = L11_Render_2::class.java.simpleName
 
 
         /**
          * 片段着色器
+         *   uniform samplerExternalOES ourTexture;
          */
         private var FRAGMENT_SHADER = """#version 300 es
             #extension GL_OES_EGL_image_external_essl3 : require
@@ -91,8 +96,10 @@ class L10_Render : BaseRender() {
             0f, 0f, 0f, 1f
         )
 
+
     }
 
+    private var uMatrix = 0
 
     // private var colorData = BufferUtil.createFloatBuffer(COLOR_DATA)
 
@@ -130,6 +137,9 @@ class L10_Render : BaseRender() {
 
         //解绑纹理对象
         GLES30.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 0)
+        uMatrix = getUniform(U_MATRIX)
+        Matrix.rotateM(UnitMatrix, 0, 180f, 1f, 0f, 0f);
+        GLES30.glUniformMatrix4fv(uMatrix, 1, false, UnitMatrix, 0)
         useVaoVboAndEbo()
 
 
@@ -143,6 +153,7 @@ class L10_Render : BaseRender() {
         //更新 matrix 的值，即把 UnitMatrix 值，更新到 uMatrix 这个索引
         //GLES30.glUniformMatrix4fv(uMatrix, 1, false, UnitMatrix, 0)
         var time = -1L
+        useFboRbo(width, height)
         decoder = VideoDncoder().apply {
             surfaceTexture = SurfaceTexture(textures[0]).apply {
                 setDefaultBufferSize(width, height)
@@ -159,14 +170,50 @@ class L10_Render : BaseRender() {
 
     }
 
+    private fun resetMatrix() {
+        Matrix.orthoM(UnitMatrix, 0, -1f, 1f, -1f, 1f, -1f, 1f)
+        GLES30.glUniformMatrix4fv(uMatrix, 1, false, UnitMatrix, 0)
+    }
+
     override fun onDrawFrame(gl: GL10?) {
         //步骤1：使用glClearColor设置的颜色，刷新Surface
-        GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT)
         surfaceTexture?.updateTexImage()
+        if (takeScreen) {
+            fboBean?.apply {
+                Matrix.rotateM(UnitMatrix, 0, 180f, 1f, 0f, 0f);
+                GLES30.glUniformMatrix4fv(uMatrix, 1, false, UnitMatrix, 0)
+                GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT)
+                // 绑定 FBO
+                GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, fboId)
+
+                GLES30.glViewport(0, 0, width, height)
+                GLES30.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textures[0])
+                GLES30.glBindVertexArray(vao[0])
+                GLES30.glDrawElements(GLES30.GL_TRIANGLE_STRIP, 6, GLES30.GL_UNSIGNED_INT, 0)
+
+                val startTime = System.currentTimeMillis()
+                val bmp = readBufferPixelToBitmap(width, height)
+                image?.post {
+                    image?.setImageBitmap(bmp)
+                }
+                val endTime = System.currentTimeMillis()
+                Log.d(TAG, "zsr onDrawFrame: ${endTime - startTime}")
+
+                // 解绑 FBO
+                GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, 0)
+                GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, 0)
+                //  GLES30.glBindRenderbuffer(GLES30.GL_RENDERBUFFER, 0)
+               // GLES30.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 0)
+                takeScreen = false
+            }
+        }
+        resetMatrix()
+        GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT)
         GLES30.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textures[0])
         GLES30.glBindVertexArray(vao[0])
         GLES30.glDrawElements(GLES30.GL_TRIANGLE_STRIP, 6, GLES30.GL_UNSIGNED_INT, 0)
-        GLES30.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 0)
+
+
     }
 
     private var h264ParseThread: H264ParseThread? = null
@@ -183,7 +230,7 @@ class L10_Render : BaseRender() {
 
             override fun onFrame(byteArray: ByteArray, offset: Int, count: Int) {
                 decoder?.feedData(byteArray, offset, count)
-                Thread.sleep(55)
+                Thread.sleep(60)
 
             }
         })
@@ -192,6 +239,8 @@ class L10_Render : BaseRender() {
     }
 
     private lateinit var glView: GLSurfaceView
+    private var image: ImageView? = null
+    private var takeScreen = false
     override fun show(context: Context) {
         super.show(context)
         val frame = FrameLayout(context)
@@ -202,7 +251,7 @@ class L10_Render : BaseRender() {
             )
             setEGLContextClientVersion(3)
             setEGLConfigChooser(false)
-            setRenderer(this@L10_Render)
+            setRenderer(this@L11_Render_2)
             renderMode = GLSurfaceView.RENDERMODE_CONTINUOUSLY
             frame.addView(this)
         }
@@ -211,33 +260,23 @@ class L10_Render : BaseRender() {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
             )
-            orientation = LinearLayout.HORIZONTAL
+            orientation = LinearLayout.VERTICAL
+
+        }
+        linear.addBtn("截图") {
+            takeScreen = true
+        }
+
+        image = ImageView(context).apply {
+            layoutParams = ViewGroup.LayoutParams(
+                192 * 4,
+                108 * 4
+            )
+            setImageResource(R.mipmap.ic_launcher)
+            setBackgroundColor(Color.RED)
             frame.addView(this)
         }
-        linear.addBtn("还原") {
-            val msg = "FragColor = texture(ourTexture,vTexture);"
-            loadFragmentVertex(msg, frame, linear)
-        }
-        linear.addBtn("灰色") {
-            val msg = """
-                    vec4 temColor = texture(ourTexture,vTexture);
-                    float gray = temColor.r * 0.2126 + temColor.g * 0.7152 + temColor.b * 0.0722;
-                    FragColor = vec4(gray,gray,gray,1.0);
-            """
-            loadFragmentVertex(msg, frame, linear)
-        }
-
-        linear.addBtn("反色") {
-            val msg = """
-                    vec4 temColor = texture(ourTexture,vTexture);
-                    float r = 1.0- temColor.r;
-                    float g = 1.0- temColor.g;
-                    float b = 1.0- temColor.b;
-                    FragColor = vec4(r,g,b,1.0);
-            """
-            loadFragmentVertex(msg, frame, linear)
-        }
-
+        frame.addView(linear)
 
         view = frame
     }
@@ -281,6 +320,71 @@ class L10_Render : BaseRender() {
         decoder = null
         surfaceTexture?.release()
         surfaceTexture = null
+    }
+
+    private var fboBean: FboBean? = null
+    private fun useFboRbo(width: Int, height: Int) {
+        //创建fbo
+        val fbos = IntArray(1)
+        GLES30.glGenFramebuffers(1, fbos, 0)
+        val frameBuffer = fbos[0]
+        val textures = IntArray(1)
+        GLES30.glGenTextures(1, textures, 0)
+        val textureId = textures[0]
+
+        //创建rbo
+        //   val rbos = IntArray(1)
+        //   GLES30.glGenFramebuffers(1,rbos,0)
+        //   GLES30.glBindRenderbuffer(GLES30.GL_RENDERBUFFER,rbos[0])
+
+
+        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, textureId)
+        //纹理过滤
+        GLES30.glTexParameteri(
+            GLES30.GL_TEXTURE_2D,
+            GLES30.GL_TEXTURE_MIN_FILTER,
+            GLES30.GL_NEAREST
+        )
+
+        GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_LINEAR)
+
+        GLES30.glTexImage2D(
+            GLES30.GL_TEXTURE_2D,
+            0,
+            GLES30.GL_RGBA,
+            width,
+            height,
+            0,
+            GLES30.GL_RGBA,
+            GLES30.GL_UNSIGNED_BYTE,
+            null
+        )
+
+        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, frameBuffer)
+        GLES30.glFramebufferTexture2D(
+            GLES30.GL_FRAMEBUFFER,
+            GLES30.GL_COLOR_ATTACHMENT0,
+            GLES30.GL_TEXTURE_2D,
+            textureId,
+            0
+        )
+
+        val status = GLES30.glCheckFramebufferStatus(GLES30.GL_FRAMEBUFFER)
+        if (status != GLES30.GL_FRAMEBUFFER_COMPLETE) {
+            throw RuntimeException("Failed to create texture.")
+        }
+        // GLES30.glRenderbufferStorage(GLES30.GL_RENDERBUFFER,GLES30.GL_DEPTH24_STENCIL8,width,height)
+        //  GLES30.glFramebufferRenderbuffer(GLES30.GL_FRAMEBUFFER,GLES30.GL_DEPTH_STENCIL_ATTACHMENT,GLES30.GL_RENDERBUFFER,rbos[0])
+
+        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, 0)
+        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, 0)
+        GLES30.glBindRenderbuffer(GLES30.GL_RENDERBUFFER, 0)
+
+        fboBean = FboBean(frameBuffer, textureId, width, height).apply {
+            //  rboId = rbos[0]
+        }
+
+
     }
 
     val vbo = IntArray(2)
@@ -341,15 +445,5 @@ class L10_Render : BaseRender() {
         GLES30.glBindBuffer(GLES30.GL_ELEMENT_ARRAY_BUFFER, 0)
     }
 
-
-    private fun readH264File() {
-        val stream = context.resources.assets.open("video.h264")
-        //开始肯定是 sps，所以，帧的起始位置为0
-        val frameStart = 0
-
-        //先读取头部4个自己，判断h264 是哪种格式
-        val head = ByteArray(4)
-        stream.read(head)
-    }
 
 }

@@ -111,6 +111,8 @@ class L11_Render_1 : BaseRender() {
     //颜色分量为3
     private val COLOR_COMPONENT_COUNT = 3
     private var uMatrix = 0
+    private var screenWidth = 0
+    private var screenHeight = 0
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
         GLES30.glClearColor(1f, 1f, 1f, 1f)
         makeProgram(VERTEX_SHADER, FRAGMENT_SHADER)
@@ -142,6 +144,8 @@ class L11_Render_1 : BaseRender() {
       // GLES30.glUniformMatrix4fv(uMatrix, 1, false, UnitMatrix, 0)
         Matrix.orthoM(UnitMatrix, 0, -1f, 1f, -1f, 1f, -1f, 1f)
         GLES30.glUniformMatrix4fv(uMatrix, 1, false, UnitMatrix, 0)
+        screenWidth = width;
+        screenHeight = height
 
     }
     private var image: ImageView? = null
@@ -210,7 +214,7 @@ class L11_Render_1 : BaseRender() {
 
 
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT )
-        GLES30.glViewport(0, 0, 3840, 2160)
+        GLES30.glViewport(0, 0, screenWidth, screenHeight)
         resetMatrix()
         if (aspectRatio > 1) {
             Matrix.orthoM(UnitMatrix, 0, -aspectRatio, aspectRatio, -1f, 1f, -1f, 1f)

@@ -40,6 +40,7 @@ class MainActivity : AppCompatActivity() {
             RenderItem(L10_Render::class.java, "L10 - MediaCodec+OpenGL实现视频渲染"),
             RenderItem(L11_Render::class.java, "L11 - FBO 纹理"),
             RenderItem(L11_Render_1::class.java, "L11-1 - FBO RBO 纹理"),
+            RenderItem(L11_Render_2::class.java, "L11-2 - MediaCodec+OpenGL实现视频渲染，使用 FBO 截图"),
         )
         with(recycleView) {
             layoutManager = LinearLayoutManager(this@MainActivity)

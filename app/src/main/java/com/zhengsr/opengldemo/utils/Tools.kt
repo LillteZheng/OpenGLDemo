@@ -1,13 +1,17 @@
 package com.zhengsr.opengldemo.utils
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.opengl.GLES20
 import android.opengl.GLES30
 import android.opengl.GLUtils
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.WindowManager
 import androidx.annotation.ReturnThis
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 /**
  * @author by zhengshaorui 2022/12/3
@@ -19,7 +23,7 @@ data class TextureBean(var id: Int, var width: Int,var height: Int) {
 }
 data class FboBean(var fboId: Int, val textureId:Int, var width: Int, var height: Int) {
     constructor():this(-1,-1,0,0)
-    var rboId:Int = -1
+    var rboId:Int = 0
 }
 
 
@@ -113,4 +117,13 @@ fun getRealWidth(context: Context): Int {
 
 fun GLES30.gl(block:GLES30.()->Unit){
     block.invoke(this)
+}
+fun readBufferPixelToBitmap(width: Int, height: Int): Bitmap {
+    val buf = ByteBuffer.allocateDirect(width * height * 4)
+    buf.order(ByteOrder.LITTLE_ENDIAN)
+    GLES30.glReadPixels(0, 0, width, height, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, buf)
+    buf.rewind()
+    val bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+    bmp.copyPixelsFromBuffer(buf)
+    return bmp
 }
