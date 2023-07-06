@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
             RenderItem(L6_ShapeRender_1::class.java, "L6-1 - 多纹理-图片混合"),
             RenderItem(L7_ShapeRender::class.java, "L7 - Matrix变换"),
             RenderItem(L7_ShapeRender_1::class.java, "L7-1 - 透视投影"),
-            RenderItem(L7_ShapeRender_2::class.java, "L7-1 - 3D效果"),
+            RenderItem(L7_ShapeRender_2::class.java, "L7-2 - 3D效果"),
             RenderItem(L8_ShapeRender::class.java, "L8 - 模拟EGL环境,不使用GlSurfaceView"),
             RenderItem(L9_Render::class.java, "L9 - 渲染YUV视频"),
             RenderItem(L9_Render_1::class.java, "L9-1 - 渲染视频,抖音特效"),

@@ -27,6 +27,8 @@
 
 [Android OpenGL ES 学习(十二) - MediaCodec + OpenGL 解析H264视频+滤镜](https://blog.csdn.net/u011418943/article/details/128496199?csdn_share_tail=%7B%22type%22%3A%22blog%22%2C%22rType%22%3A%22article%22%2C%22rId%22%3A%22128496199%22%2C%22source%22%3A%22u011418943%22%7D)
 
+[Android OpenGL ES 学习(十三) -离屏渲染FBO(截图)RBO, OES转 FBO](https://blog.csdn.net/u011418943/article/details/131578103?csdn_share_tail=%7B%22type%22%3A%22blog%22%2C%22rType%22%3A%22article%22%2C%22rId%22%3A%22131578103%22%2C%22source%22%3A%22u011418943%22%7D)
+
 > **代码工程地址： [https://github.com/LillteZheng/OpenGLDemo.git](https://github.com/LillteZheng/OpenGLDemo.git)**
 
 >  更多音视频，参考：[Android 音视频入门/进阶教程](https://blog.csdn.net/u011418943/article/details/128478498?csdn_share_tail=%7B%22type%22:%22blog%22,%22rType%22:%22article%22,%22rId%22:%22128478498%22,%22source%22:%22u011418943%22%7D)

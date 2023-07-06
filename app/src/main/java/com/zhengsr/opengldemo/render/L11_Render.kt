@@ -181,7 +181,6 @@ class L11_Render : BaseRender() {
 
     override fun onDrawFrame(gl: GL10?) {
         resetMatrix()
-
         // 步骤1：使用 glClearColor 设置的颜色，刷新 Surface
         fboBean?.apply {
             GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT )
@@ -214,6 +213,7 @@ class L11_Render : BaseRender() {
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT )
         GLES30.glViewport(0, 0, screenWidth, screenHeight)
         resetMatrix()
+        // 正交投影
         if (aspectRatio > 1) {
             Matrix.orthoM(UnitMatrix, 0, -aspectRatio, aspectRatio, -1f, 1f, -1f, 1f)
         } else {
@@ -234,9 +234,8 @@ class L11_Render : BaseRender() {
 
     private var fboBean: FboBean? = null
     private fun useFbo(width: Int, height: Int) {
-        val fbs = IntArray(1)
-        GLES30.glGenFramebuffers(1, fbs, 0)
-        val frameBuffer = fbs[0]
+        val frameBuffers = IntArray(1)
+        GLES30.glGenFramebuffers(1, frameBuffers, 0)
         val textures = IntArray(1)
         GLES30.glGenTextures(1, textures, 0)
         val textureId = textures[0]
@@ -264,7 +263,7 @@ class L11_Render : BaseRender() {
             null
         )
 
-        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, frameBuffer)
+        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, frameBuffers[0])
         GLES30.glFramebufferTexture2D(
             GLES30.GL_FRAMEBUFFER,
             GLES30.GL_COLOR_ATTACHMENT0,
@@ -281,7 +280,7 @@ class L11_Render : BaseRender() {
         GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, 0)
         GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, 0)
 
-        fboBean = FboBean(frameBuffer, textureId, width, height)
+        fboBean = FboBean(frameBuffers[0], textureId, width, height)
 
 
     }
